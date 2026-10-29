@@ -5,7 +5,7 @@
 // Purpose: the telnet protocol (RFC 854 and its options) between a terminal and a telnet server:
 // what the server sends split into the program's output and the protocol's own commands, the
 // commands answered, and what the terminal types made safe to send. A Codec knows no connection;
-// Link (link.go) puts one on a TCP connection, and sdterm-keeper's telnet bridge on its own.
+// Link (link.go) puts one on a TCP connection, and spectashell-keeper's telnet bridge on its own.
 //
 // Notes:
 //   - Options agreed: ECHO and SUPPRESS-GO-AHEAD the server's (character at a time, the server

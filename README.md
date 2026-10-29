@@ -5,8 +5,8 @@
 > Licensed under the Apache License 2.0 ([LICENSE](LICENSE)). Copyright 2026 Calida Lab.
 
 SpectaShell is a terminal for the Mac, the iPad and the iPhone. On a machine where the user lets it,
-it puts a small program there, `sdterm-keeper`, which holds the shell and its last output, so the
-shell outlives a dropped connection, a sleeping device and the app being quit or updated.
+it puts a small program there, `spectashell-keeper`, which holds the shell and its last output, so
+the shell outlives a dropped connection, a sleeping device and the app being quit or updated.
 
 This repository is all of that program's source: what runs on your machine can be read here, and
 rebuilt from here to the same bytes. It is also SpectaShell's terminal engine — the emulator, the
@@ -16,12 +16,12 @@ shell and what the shell's prompt reports with no app attached.
 ## What runs on a host
 
 - **One program, installed by the app over your SSH login,** at
-  `~/.local/share/sdterm/<build>/sdterm-keeper`. Nothing is installed system-wide and nothing needs
-  root.
+  `~/.local/share/spectashell/<build>/spectashell-keeper`. Nothing is installed system-wide and
+  nothing needs root.
 - **It listens on no network port.** The app reaches it only through exec channels of your own SSH
   connection; a keeper's socket is in a folder that must be yours with no group or other access
-  (`/tmp/sdterm-<uid>/keepers` on Linux, `~/Library/Application Support/sdTerm/keepers` on a Mac),
-  or nothing starts.
+  (`/tmp/spectashell-<uid>/keepers` on Linux, `~/Library/Application Support/SpectaShell/keepers` on
+  a Mac), or nothing starts.
 - **Its protocol is [Docs/KEEPER.md](Docs/KEEPER.md):** a frame format on a Unix socket, version 1
   for good, since keepers outlive the builds that started them.
 - **A keeper ends when you close its shell from the app,** or 24 hours after its shell ended with
@@ -38,7 +38,7 @@ shell and what the shell's prompt reports with no app attached.
 | `shellinteg/` | Shell integration for bash, zsh and fish, embedded in the program |
 | `telnet/` | Telnet, as a codec and a terminal's link |
 | `proto/`, `gen/` | The engine's messages (`terminal.proto`) and their generated Go |
-| `cmd/sdterm-keeper/` | The program itself: `keep`, `start`, `attach`, `join`, `list`, `page`, `mcp`, `serial`, `telnet` |
+| `cmd/spectashell-keeper/` | The program itself: `keep`, `start`, `attach`, `join`, `list`, `page`, `mcp`, `serial`, `telnet` |
 | `host/` | The program's packages: its commands' messages (`hostkeeper`), the host's boot (`hostboot`), this user's processes (`procs`), a coding agent's page commands (`pages`), serial and telnet consoles (`console`) |
 | `scripts/build-keeper.sh` | The build of the program for Linux and the Mac, with the checksums |
 
@@ -65,15 +65,15 @@ machine.
 
 ```sh
 # On the host: the build id, and the checksum of the binary that runs there.
-~/.local/share/sdterm/*/sdterm-keeper version
-sha256sum ~/.local/share/sdterm/<build id>/sdterm-keeper
+~/.local/share/spectashell/*/spectashell-keeper version
+sha256sum ~/.local/share/spectashell/<build id>/spectashell-keeper
 
 # Here, at the commit of that release: build it the way the app's build does (GOARCH=arm64 for an
 # arm64 host), and compare.
 GOTOOLCHAIN=go1.27.2 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-  go build -trimpath -buildvcs=false -ldflags "-s -w -X main.build=<build id>" -o sdterm-keeper \
-  ./cmd/sdterm-keeper
-sha256sum sdterm-keeper
+  go build -trimpath -buildvcs=false -ldflags "-s -w -X main.build=<build id>" -o spectashell-keeper \
+  ./cmd/spectashell-keeper
+sha256sum spectashell-keeper
 ```
 
 The macOS binaries are built with cgo, so they also depend on Xcode's compiler and SDK; the one

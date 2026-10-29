@@ -12,13 +12,13 @@ import "testing"
 func TestBuildOf(t *testing.T) {
 	home := "/home/u"
 	for path, want := range map[string]string{
-		"/home/u/.local/share/sdterm/0.1.0+1.7c72/sdterm-keeper":           "0.1.0+1.7c72",
-		"/home/u/.local/share/sdterm/0.1.0+1.7c72/sdterm-keeper (deleted)": "0.1.0+1.7c72",
-		"/home/u/.local/share/sdterm/current/sdterm-keeper":                "current",
-		"/home/u/.local/share/sdterm/sdterm-keeper":                        "",
-		"/home/u/.local/share/sdtermx/b/sdterm-keeper":                     "",
-		"/Applications/SpectaShell.app/Contents/Helpers/sdterm-keeper":     "",
-		"/home/u/.local/share/sdterm/a b/sdterm-keeper":                    "",
+		"/home/u/.local/share/spectashell/0.1.0+1.7c72/spectashell-keeper":           "0.1.0+1.7c72",
+		"/home/u/.local/share/spectashell/0.1.0+1.7c72/spectashell-keeper (deleted)": "0.1.0+1.7c72",
+		"/home/u/.local/share/spectashell/current/spectashell-keeper":                "current",
+		"/home/u/.local/share/spectashell/spectashell-keeper":                        "",
+		"/home/u/.local/share/spectashellx/b/spectashell-keeper":                     "",
+		"/Applications/SpectaShell.app/Contents/Helpers/spectashell-keeper":          "",
+		"/home/u/.local/share/spectashell/a b/spectashell-keeper":                    "",
 		"": "",
 	} {
 		if got := BuildOf(home, path); got != want {

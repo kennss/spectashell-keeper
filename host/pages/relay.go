@@ -3,7 +3,7 @@
 // Created: 2026-10-25 · Last updated: 2026-10-29
 //
 // Purpose: page commands from a host to the device that holds a shell there (Docs/DESIGN.md
-// §6.1.2). The core runs `sdterm-keeper pages-relay <device>` over an exec channel of each
+// §6.1.2). The core runs `spectashell-keeper pages-relay <device>` over an exec channel of each
 // connection to a host whose shells are kept; the relay listens at the device's socket there and
 // passes each request through the channel's standard output, and each reply back through its
 // standard input, to the core, which answers it (ServeRelay). No port is opened on either side.

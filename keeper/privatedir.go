@@ -1,6 +1,6 @@
 // privatedir.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-23
+// Created: 2026-10-14 · Last updated: 2026-10-29
 //
 // Purpose: the folder that holds keepers' sockets and descriptions, and the check that only the
 // user can reach it (Docs/DESIGN.md §5.1, §5.3). Anyone who can reach a keeper's socket can type
@@ -34,9 +34,9 @@ import (
 // says what the folders are called.
 type Place struct {
 	// TempName is the Linux folder's name in the temporary directory, before "-<uid>"
-	// ("sdterm" gives /tmp/sdterm-1000).
+	// ("spectashell" gives /tmp/spectashell-1000).
 	TempName string
-	// AppSupportName is the macOS folder's name in ~/Library/Application Support ("sdTerm").
+	// AppSupportName is the macOS folder's name in ~/Library/Application Support ("SpectaShell").
 	AppSupportName string
 	// Override is an environment variable that, when set, names the keepers' folder itself.
 	Override string

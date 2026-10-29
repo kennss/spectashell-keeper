@@ -4,7 +4,7 @@
 //
 // Purpose: a coding agent's commands to the page beside its shell (Docs/DESIGN.md §6.1.2): what a
 // command and its reply are, where a device's socket for them is, and asking one. The agent runs
-// the keeper program (`sdterm-keeper page …`, cli.go; `sdterm-keeper mcp`, mcp.go); the command
+// the keeper program (`spectashell-keeper page …`, cli.go; `spectashell-keeper mcp`, mcp.go); the command
 // finds the keeper of its shell (shell.go) and the device that holds it, and asks that device's
 // socket — the core itself on the Mac, a relay on a host (relay.go) — which passes it to the app.
 //

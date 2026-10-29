@@ -15,9 +15,9 @@ This is the terminal engine's protocol, not any application's; sdTerm and Silico
 
 ## 1. Starting a keeper
 
-The client runs the keeper program (`sdterm-keeper keep`) in a session of its own (`setsid`), so
-it is in no client's process group, writes a configuration to its standard input as JSON and closes
-it:
+The client runs the keeper program (`spectashell-keeper keep`) in a session of its own (`setsid`),
+so it is in no client's process group, writes a configuration to its standard input as JSON and
+closes it:
 
 | Key | Meaning |
 |---|---|
@@ -106,8 +106,8 @@ keeper reads no more of the program's output while more than 1 MiB waits for the
 socket's buffer held the program back before; a watcher with more than the kept output and 4 MiB
 waiting is closed, and can join again for a replay.
 
-**A keeper from before has no `<keeper id>.join`.** Joining it fails before connecting anywhere,
-so a client meaning to watch never takes such a keeper over; `sdterm-keeper join` exits 3 and says
+**A keeper from before has no `<keeper id>.join`.** Joining it fails before connecting anywhere, so
+a client meaning to watch never takes such a keeper over; `spectashell-keeper join` exits 3 and says
 so.
 
 ## 3. Meta

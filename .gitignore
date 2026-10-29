@@ -6,5 +6,5 @@
 # message code (gen/) is committed; the programs built from it are not.
 
 .DS_Store
-/sdterm-keeper
+/spectashell-keeper
 /out/

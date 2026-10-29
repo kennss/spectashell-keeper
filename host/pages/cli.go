@@ -2,7 +2,7 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-29
 //
-// Purpose: `sdterm-keeper page <command>`, an agent's command to the page beside its shell
+// Purpose: `spectashell-keeper page <command>`, an agent's command to the page beside its shell
 // (Docs/DESIGN.md §6.1.2), for any agent that runs commands: its arguments read into a request,
 // asked (ask.go), and the answer printed — or written, for a screenshot.
 //
@@ -31,7 +31,7 @@ import (
 )
 
 // Usage is the page command's help.
-const Usage = `usage: sdterm-keeper page <command> [arguments] [--port N]
+const Usage = `usage: spectashell-keeper page <command> [arguments] [--port N]
 
 Drives the page beside this shell in SpectaShell — the one its user sees — for a coding agent.
 A target is a ref from a snapshot (e12) or a CSS selector; --text "Sign in" names an element by
@@ -72,7 +72,7 @@ func Command(a Asker, args []string, in io.Reader, out, errs io.Writer) int {
 	}
 	command, port, request, err := parse(args, in)
 	if err != nil {
-		fmt.Fprintf(errs, "sdterm-keeper page: %v\n\n%s", err, Usage)
+		fmt.Fprintf(errs, "spectashell-keeper page: %v\n\n%s", err, Usage)
 		return 2
 	}
 	// Where a screenshot goes is the command's own business, not the app's.

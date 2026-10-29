@@ -2,7 +2,7 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-29
 //
-// Purpose: sdterm-keeper as the core drives it on a host (Docs/DESIGN.md §5.3), the real binary
+// Purpose: spectashell-keeper as the core drives it on a host (Docs/DESIGN.md §5.3), the real binary
 // over pipes as over SSH exec channels: start prints a keeper's id and leaves it running; list
 // describes it, with this boot's id, without taking it over; attach carries the keeper protocol,
 // a second attach takes the shell over from the first, and Hangup through it ends the keeper; join
@@ -10,7 +10,7 @@
 // Every keeper started is hung up when the test ends, failed or not.
 //
 // Notes:
-// - Moved here from core/cmd/sdterm-keeper on 2026-10-29, with the keeper program
+// - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
 //   (Docs/DESIGN.md §3.2).
 
 //go:build unix
@@ -30,10 +30,10 @@ import (
 	"github.com/kennss/spectashell-keeper/keeper"
 )
 
-// binary builds sdterm-keeper for the test.
+// binary builds spectashell-keeper for the test.
 func binary(t *testing.T) string {
 	t.Helper()
-	out := filepath.Join(t.TempDir(), "sdterm-keeper")
+	out := filepath.Join(t.TempDir(), "spectashell-keeper")
 	cmd := exec.Command("go", "build", "-ldflags", "-X main.build=test-build", "-o", out, ".")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build: %v\n%s", err, b)
@@ -83,7 +83,7 @@ func attachOver(t *testing.T, bin, id string) *keeper.Conn {
 	return relayOver(t, bin, "attach", id)
 }
 
-// relayOver runs `sdterm-keeper <how> <id>` (attach or join) and speaks the protocol through it.
+// relayOver runs `spectashell-keeper <how> <id>` (attach or join) and speaks the protocol through it.
 func relayOver(t *testing.T, bin, how, id string) *keeper.Conn {
 	t.Helper()
 	cmd := exec.Command(bin, how, id)

@@ -2,7 +2,7 @@
 // Author: Kennt Kim
 // Created: 2026-10-14 · Last updated: 2026-10-29
 //
-// Purpose: the keeper process (`sdterm-keeper keep`, Docs/KEEPER.md): it holds one terminal
+// Purpose: the keeper process (`spectashell-keeper keep`, Docs/KEEPER.md): it holds one terminal
 // program on its pseudo-terminal, keeps the program's recent output, and serves its clients over
 // two Unix sockets — one that takes the keeper over, one that joins it to watch — so the program
 // outlives the client that started it.

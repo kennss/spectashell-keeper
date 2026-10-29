@@ -3,7 +3,7 @@
 // Created: 2026-10-29 · Last updated: 2026-10-29
 //
 // Purpose: a telnet session as a console a keeper runs (Docs/DESIGN.md §5.8): the engine's telnet
-// codec as the bridge's Translator, so `sdterm-keeper telnet` is the bridge with a TCP connection
+// codec as the bridge's Translator, so `spectashell-keeper telnet` is the bridge with a TCP connection
 // where a serial command has its port.
 //
 // Notes:

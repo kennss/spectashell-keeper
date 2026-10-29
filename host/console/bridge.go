@@ -2,7 +2,7 @@
 // Author: Kennt Kim
 // Created: 2026-10-27 · Last updated: 2026-10-29
 //
-// Purpose: a console as a program a keeper runs (Docs/DESIGN.md §5.8): sdterm-keeper's serial and
+// Purpose: a console as a program a keeper runs (Docs/DESIGN.md §5.8): spectashell-keeper's serial and
 // telnet commands put a serial port or a telnet session where a shell would be, and this copies
 // between it and the keeper's terminal — so a board's console stays open with the app closed, its
 // output is replayed to whoever opens it, and another device can open or watch it, as any kept shell.

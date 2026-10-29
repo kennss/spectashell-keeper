@@ -130,7 +130,7 @@ func Dial(socket string) (*Conn, error) {
 }
 
 // NewConn reads a keeper's Hello from a stream that reaches it — a socket, or a relay such as
-// `sdterm-keeper attach` over SSH — and returns the connection; the kept output follows on
+// `spectashell-keeper attach` over SSH — and returns the connection; the kept output follows on
 // ReadEvents. The stream is closed when no Hello comes within helloTimeout.
 func NewConn(rw io.ReadWriteCloser) (*Conn, error) {
 	c := &Conn{conn: rw, r: bufio.NewReaderSize(rw, 256*1024)}

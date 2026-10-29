@@ -2,43 +2,43 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-29
 //
-// Purpose: sdterm-keeper, the program that holds a shell (Docs/DESIGN.md §5.1, §5.3; the keeper
+// Purpose: spectashell-keeper, the program that holds a shell (Docs/DESIGN.md §5.1, §5.3; the keeper
 // itself is the engine's, engine/keeper). The Mac app carries it for its local shells; the core
 // puts it on hosts that allow it and drives it there over SSH exec channels.
 //
 // Usage:
-//   sdterm-keeper keep         the keeper itself: a keeper.Config on standard input (keeper.Main)
-//   sdterm-keeper start        a StartRequest (JSON) on standard input; starts a keeper for it in a
+//   spectashell-keeper keep         the keeper itself: a keeper.Config on standard input (keeper.Main)
+//   spectashell-keeper start        a StartRequest (JSON) on standard input; starts a keeper for it in a
 //                              session of its own and prints {"keeper_id": …} — or {"error": …}
-//   sdterm-keeper attach <id> [--agent]
+//   spectashell-keeper attach <id> [--agent]
 //                              copies standard input and output to that keeper's socket, unchanged:
 //                              the keeper protocol travels through an exec channel; with --agent,
 //                              points the keeper's agent link at SSH_AUTH_SOCK, the agent forwarded
 //                              to this channel, while it holds the keeper
-//   sdterm-keeper join <id>    the same through the keeper's socket for joining, to watch without
+//   spectashell-keeper join <id>    the same through the keeper's socket for joining, to watch without
 //                              taking it over (Docs/DESIGN.md §6.9); exits 3, saying so, when the
 //                              keeper is from a build that cannot be joined
-//   sdterm-keeper list         prints {"boot": …, "keepers": [descriptions]} without connecting to
+//   spectashell-keeper list         prints {"boot": …, "keepers": [descriptions]} without connecting to
 //                              any keeper (connecting would take it over)
-//   sdterm-keeper version      prints "sdterm-keeper <build>", for the installer
-//   sdterm-keeper builds       prints {"builds": […]}: the builds a keeper here, or any other
+//   spectashell-keeper version      prints "spectashell-keeper <build>", for the installer
+//   spectashell-keeper builds       prints {"builds": […]}: the builds a keeper here, or any other
 //                              program of this user's, runs from, whose folders the installer keeps
 //                              (hostkeeper.BuildsInUse)
-//   sdterm-keeper page <cmd>   a coding agent's command to the page beside its shell in SpectaShell
+//   spectashell-keeper page <cmd>   a coding agent's command to the page beside its shell in SpectaShell
 //                              (host/pages, cli.go; Docs/DESIGN.md §6.1.2)
-//   sdterm-keeper mcp          the same commands as an MCP server on standard input and output
-//   sdterm-keeper serial [options] <device>, sdterm-keeper telnet <host> [port]
+//   spectashell-keeper mcp          the same commands as an MCP server on standard input and output
+//   spectashell-keeper serial [options] <device>, spectashell-keeper telnet <host> [port]
 //                              a serial port, or a telnet session, as the program a keeper runs
 //                              where a shell would be (console.go; Docs/DESIGN.md §5.8)
-//   sdterm-keeper serial-ports prints {"ports": […]}: this machine's serial ports
-//   sdterm-keeper pages-relay <device>
+//   spectashell-keeper serial-ports prints {"ports": […]}: this machine's serial ports
+//   spectashell-keeper pages-relay <device>
 //                              run by the core over an exec channel: the device's socket for page
 //                              commands on this host, passed through the channel (pages/relay.go)
 //
 // Notes:
 // - build is set at link time (-ldflags "-X main.build=…") by scripts/build-keeper.sh.
-// - The keepers' folder is the engine's keeper.Place: /tmp/sdterm-<uid>/keepers on Linux,
-//   ~/Library/Application Support/sdTerm/keepers on macOS, or SDTERM_RUNTIME_DIR; it must be the
+// - The keepers' folder is the engine's keeper.Place: /tmp/spectashell-<uid>/keepers on Linux,
+//   ~/Library/Application Support/SpectaShell/keepers on macOS, or SDTERM_RUNTIME_DIR; it must be the
 //   user's own, or nothing starts (§5.3).
 // - start prepares the program as the Mac app's core does for a local shell (termhost.Prepare):
 //   the login shell with the terminal's variables, LANG from the request, and shell integration,
@@ -54,7 +54,7 @@
 // - boot is what changes when the host restarts (Linux's boot_id, the Mac's kern.boottime;
 //   host/hostboot), so the app can tell keepers that ended with a restart from keepers
 //   that were closed (§5.3).
-// - Moved here from core/cmd/sdterm-keeper on 2026-10-29, with the keeper program
+// - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
 //   (Docs/DESIGN.md §3.2).
 
 package main
@@ -87,7 +87,7 @@ type (
 var build = "dev"
 
 // place is where this host's keepers are.
-var place = keeper.Place{TempName: "sdterm", AppSupportName: "sdTerm", Override: "SDTERM_RUNTIME_DIR"}
+var place = keeper.Place{TempName: "spectashell", AppSupportName: "SpectaShell", Override: "SDTERM_RUNTIME_DIR"}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -108,7 +108,7 @@ func main() {
 			usage()
 		}
 		if err := attach(os.Args[2], agent, os.Stdin, os.Stdout); err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper attach:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper attach:", err)
 			os.Exit(1)
 		}
 	case "join":
@@ -116,7 +116,7 @@ func main() {
 			usage()
 		}
 		if err := join(os.Args[2], os.Stdin, os.Stdout); err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper join:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper join:", err)
 			if errors.Is(err, keeper.ErrCannotJoin) {
 				os.Exit(hostkeeper.ExitCannotJoin)
 			}
@@ -125,7 +125,7 @@ func main() {
 	case "list":
 		_ = json.NewEncoder(os.Stdout).Encode(list())
 	case "version":
-		fmt.Printf("sdterm-keeper %s\n", build)
+		fmt.Printf("spectashell-keeper %s\n", build)
 	case "builds":
 		dir, err := place.Dir()
 		if err != nil {
@@ -136,18 +136,18 @@ func main() {
 	case "page":
 		dir, err := place.Dir()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper page:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper page:", err)
 			os.Exit(1)
 		}
 		os.Exit(pages.Command(pages.Here(dir), os.Args[2:], os.Stdin, os.Stdout, os.Stderr))
 	case "mcp":
 		dir, err := place.Dir()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper mcp:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper mcp:", err)
 			os.Exit(1)
 		}
 		if err := pages.MCP(pages.Here(dir), build, os.Stdin, os.Stdout); err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper mcp:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper mcp:", err)
 			os.Exit(1)
 		}
 	case "serial":
@@ -165,7 +165,7 @@ func main() {
 			err = pages.Relay(dir, os.Args[2], os.Stdin, os.Stdout)
 		}
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "sdterm-keeper pages-relay:", err)
+			fmt.Fprintln(os.Stderr, "spectashell-keeper pages-relay:", err)
 			os.Exit(1)
 		}
 	default:
@@ -174,7 +174,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: sdterm-keeper start | attach <id> [--agent] | join <id> | list | version | builds | keep | page <command> | mcp | "+
+	fmt.Fprintln(os.Stderr, "usage: spectashell-keeper start | attach <id> [--agent] | join <id> | list | version | builds | keep | page <command> | mcp | "+
 		"serial [options] <device> | telnet <host> [port] | serial-ports")
 	os.Exit(2)
 }

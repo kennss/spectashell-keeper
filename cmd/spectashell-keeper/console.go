@@ -2,21 +2,21 @@
 // Author: Kennt Kim
 // Created: 2026-10-29 · Last updated: 2026-10-29
 //
-// Purpose: sdterm-keeper's consoles (Docs/DESIGN.md §5.8): a serial port, or a telnet session, run
+// Purpose: spectashell-keeper's consoles (Docs/DESIGN.md §5.8): a serial port, or a telnet session, run
 // as the program of a keeper where a shell would be — so it stays open with the app closed, and
 // is listed, replayed, opened and watched as a kept shell is — and the serial ports this machine
 // has, for the app to choose from.
 //
 // Usage:
-//   sdterm-keeper serial [--speed 115200] [--data 8] [--parity none|even|odd] [--stop 1|2]
+//   spectashell-keeper serial [--speed 115200] [--data 8] [--parity none|even|odd] [--stop 1|2]
 //                        [--flow none|rts/cts|xon/xoff] <device>
-//   sdterm-keeper telnet <host> [port]
-//   sdterm-keeper serial-ports      prints {"ports": [{"path": …, "name": …}]}
+//   spectashell-keeper telnet <host> [port]
+//   spectashell-keeper serial-ports      prints {"ports": [{"path": …, "name": …}]}
 //
 // Notes:
 //   - Standard input and output are the keeper's terminal, put in raw mode first (console.MakeRaw).
 //   - A serial console holds the Mac awake while it runs (console.KeepAwake) and says so.
-// - Moved here from core/cmd/sdterm-keeper on 2026-10-29, with the keeper program
+// - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
 //   (Docs/DESIGN.md §3.2).
 
 package main
@@ -50,12 +50,12 @@ func serial(args []string, in, out *os.File, errs io.Writer) int {
 	flags.IntVar(&port.StopBits, "stop", 1, "stop bits, 1 or 2")
 	flow := flags.String("flow", string(console.FlowNone), "none, rts/cts or xon/xoff")
 	if err := flags.Parse(args); err != nil || flags.NArg() != 1 {
-		fmt.Fprintln(errs, "usage: sdterm-keeper serial [--speed N] [--data N] [--parity P] [--stop N] [--flow F] <device>")
+		fmt.Fprintln(errs, "usage: spectashell-keeper serial [--speed N] [--data N] [--parity P] [--stop N] [--flow F] <device>")
 		return 2
 	}
 	port.Device, port.Parity, port.Flow = flags.Arg(0), console.Parity(*parity), console.Flow(*flow)
 	if err := port.Check(); err != nil {
-		fmt.Fprintln(errs, "sdterm-keeper serial:", err)
+		fmt.Fprintln(errs, "spectashell-keeper serial:", err)
 		return 2
 	}
 	_ = console.MakeRaw(in)
@@ -83,13 +83,13 @@ func serial(args []string, in, out *os.File, errs io.Writer) int {
 // telnetCommand runs a telnet session on args ("host [port]"); it returns the program's exit code.
 func telnetCommand(args []string, in, out *os.File, errs io.Writer) int {
 	if len(args) < 1 || len(args) > 2 {
-		fmt.Fprintln(errs, "usage: sdterm-keeper telnet <host> [port]")
+		fmt.Fprintln(errs, "usage: spectashell-keeper telnet <host> [port]")
 		return 2
 	}
 	port := "23"
 	if len(args) == 2 {
 		if n, err := strconv.Atoi(args[1]); err != nil || n <= 0 || n > 65535 {
-			fmt.Fprintln(errs, "sdterm-keeper telnet: port", args[1], "is not a port")
+			fmt.Fprintln(errs, "spectashell-keeper telnet: port", args[1], "is not a port")
 			return 2
 		}
 		port = args[1]

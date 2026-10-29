@@ -2,16 +2,16 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-29
 //
-// Purpose: what sdterm-keeper's commands on a host read and print (Docs/DESIGN.md §5.3) — start a
+// Purpose: what spectashell-keeper's commands on a host read and print (Docs/DESIGN.md §5.3) — start a
 // keeper for a terminal, list the keepers there with the host's boot, the builds in use — and
 // doing the listing, which the program does for its host and the core for the Mac's own local
 // shells (ListFolder).
 //
 // Notes:
-// - The binary is at ~/.local/share/sdterm/<build>/sdterm-keeper (Programs; the core's installer
+// - The binary is at ~/.local/share/spectashell/<build>/spectashell-keeper (Programs; the core's installer
 //   puts it there). Its folder's name is a build checked to be plain characters (IsPlain), so a
 //   command line can name it without quoting.
-// - The program's types are here so the keeper program (cmd/sdterm-keeper) and the core, which
+// - The program's types are here so the keeper program (cmd/spectashell-keeper) and the core, which
 //   runs its commands over SSH, agree on them in one place.
 // - BuildsInUse is what the installer keeps: the builds of the keepers here, and of every program
 //   of this user running from the installer's folder — an attach, a relay, another device's
@@ -35,9 +35,9 @@ import (
 )
 
 // Itself, as the first word of a program a keeper runs, names the keeper program on that machine
-// (KeeperProgram): a console — `sdterm-keeper serial …`, `sdterm-keeper telnet …` (Docs/DESIGN.md
+// (KeeperProgram): a console — `spectashell-keeper serial …`, `spectashell-keeper telnet …` (Docs/DESIGN.md
 // §5.8) — runs from wherever that machine has it, which the app does not know.
-const Itself = "sdterm-keeper"
+const Itself = "spectashell-keeper"
 
 // KeeperProgram is argv with Itself, as its first word, made path: the keeper program here.
 func KeeperProgram(argv []string, path string) []string {
@@ -47,7 +47,7 @@ func KeeperProgram(argv []string, path string) []string {
 	return append([]string{path}, argv[1:]...)
 }
 
-// StartRequest is what `sdterm-keeper start` reads: a terminal's program and how to hold it.
+// StartRequest is what `spectashell-keeper start` reads: a terminal's program and how to hold it.
 type StartRequest struct {
 	// Argv is the program; empty: the user's login shell. A first word Itself is this keeper program.
 	Argv []string `json:"argv,omitempty"`
@@ -74,7 +74,7 @@ type StartAnswer struct {
 	Error    string `json:"error,omitempty"`
 }
 
-// ListAnswer is what `sdterm-keeper list` prints.
+// ListAnswer is what `spectashell-keeper list` prints.
 type ListAnswer struct {
 	// Boot changes with every restart of the host.
 	Boot    string   `json:"boot"`
@@ -98,7 +98,7 @@ type Listed struct {
 	Program string `json:"program,omitempty"`
 }
 
-// ListFolder lists the keepers in dir as `sdterm-keeper list` prints them, with this machine's boot
+// ListFolder lists the keepers in dir as `spectashell-keeper list` prints them, with this machine's boot
 // and what runs in each shell now, without connecting to any (connecting would take it over).
 func ListFolder(dir string) ListAnswer {
 	answer := ListAnswer{Boot: hostboot.ID(), Keepers: []Listed{}}
@@ -128,9 +128,9 @@ var plain = regexp.MustCompile(`^[A-Za-z0-9._+-]+$`)
 func IsPlain(s string) bool { return plain.MatchString(s) }
 
 // Programs is the folder the installer puts the keeper program in on a host whose home is home, a
-// folder for each build: <Programs>/<build>/sdterm-keeper (install.Ensure).
+// folder for each build: <Programs>/<build>/spectashell-keeper (install.Ensure).
 func Programs(home string) string {
-	return filepath.Join(home, ".local", "share", "sdterm")
+	return filepath.Join(home, ".local", "share", "spectashell")
 }
 
 // BuildOf is the build whose program in home's Programs path is; "" when it is not one of them.
@@ -146,7 +146,7 @@ func BuildOf(home, path string) string {
 	return build
 }
 
-// BuildsAnswer is what `sdterm-keeper builds` prints.
+// BuildsAnswer is what `spectashell-keeper builds` prints.
 type BuildsAnswer struct {
 	// Builds are those in use here, each once, sorted.
 	Builds []string `json:"builds"`
@@ -184,5 +184,5 @@ func BuildsInUse(dir string) BuildsAnswer {
 // keeper's agent link at it (SSH_AUTH_SOCK) while it holds the keeper.
 const AgentFlag = "--agent"
 
-// ExitCannotJoin is `sdterm-keeper join`'s exit status for a keeper that cannot be joined.
+// ExitCannotJoin is `spectashell-keeper join`'s exit status for a keeper that cannot be joined.
 const ExitCannotJoin = 3
