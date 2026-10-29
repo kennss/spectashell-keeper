@@ -1,11 +1,11 @@
 // console.go
 // Author: Kennt Kim
-// Created: 2026-10-29 · Last updated: 2026-10-29
+// Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper's consoles (Docs/DESIGN.md §5.8): a serial port, or a telnet session, run
-// as the program of a keeper where a shell would be — so it stays open with the app closed, and
-// is listed, replayed, opened and watched as a kept shell is — and the serial ports this machine
-// has, for the app to choose from.
+// Purpose: spectashell-keeper's consoles (Docs/CONNECTIONS.md §6): a serial port, or a telnet
+// session, run as the program of a keeper where a shell would be — so it stays open with the app
+// closed, and is listed, replayed, opened and watched as a kept shell is — and the serial ports
+// this machine has, for the app to choose from.
 //
 // Usage:
 //   spectashell-keeper serial [--speed 115200] [--data 8] [--parity none|even|odd] [--stop 1|2]

@@ -1,6 +1,6 @@
 // termhost.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: one live terminal — a program reached through a Link (link.go), the emulator that models
 // its screen (package term), and the plumbing between them (Docs/DESIGN.md §3, §5).
@@ -35,7 +35,7 @@
 //   no known start unless the shell gave one (shell integration).
 // - Close hangs the program up (SIGHUP, through the link); Detach leaves it to its keeper, when
 //   the link has one, for the next attach.
-// - Watching (2026-10-26, Docs/DESIGN.md §6.9): a terminal on a link that joined a keeper
+// - Watching (2026-10-26, Docs/TEAMS.md §1): a terminal on a link that joined a keeper
 //   (Config.Watch) watches until it takes the keyboard (Take), and one that held it watches once
 //   another takes it (the keeper's Present). Watching, its screen has the program's size, which the
 //   keeper sends whenever it changes, not the views'; what the user types and the emulator's

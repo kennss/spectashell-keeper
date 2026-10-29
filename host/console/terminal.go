@@ -1,8 +1,8 @@
 // terminal.go
 // Author: Kennt Kim
-// Created: 2026-10-29 · Last updated: 2026-10-29
+// Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: the keeper's terminal as a console needs it (Docs/DESIGN.md §5.8): raw, so every byte
+// Purpose: the keeper's terminal as a console needs it (Docs/CONNECTIONS.md §6): raw, so every byte
 // typed reaches the board or the server as typed; and its size, as it is and as it changes, for
 // telnet's NAWS.
 //

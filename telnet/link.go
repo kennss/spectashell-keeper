@@ -1,10 +1,10 @@
 // link.go
 // Author: Kennt Kim
-// Created: 2026-10-27 · Last updated: 2026-10-29
+// Created: 2026-10-27 · Last updated: 2026-10-30
 //
 // Purpose: a telnet connection as a terminal's link (termhost.Link): the server's output to the
 // terminal, its typing to the server, its size told by NAWS — over a TCP connection the app makes
-// itself, with nothing on a host (Docs/DESIGN.md §5.8).
+// itself, with nothing on a host (Docs/CONNECTIONS.md §6).
 //
 // Notes:
 //   - Nothing keeps a telnet session: the link has no replay (ReplayEnd comes first), and a

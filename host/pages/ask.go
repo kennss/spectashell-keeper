@@ -1,8 +1,8 @@
 // ask.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: asking the pages beside the shell this process runs in (Docs/DESIGN.md §6.1.2), for
+// Purpose: asking the pages beside the shell this process runs in (Docs/WINDOWS.md §3), for
 // the page command (cli.go) and the MCP server (mcp.go): its keeper found, the device holding it,
 // the request sent to that device's socket and its reply read.
 //

@@ -1,10 +1,10 @@
 // launch.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: what a terminal's program is, before a keeper starts it: the user's login shell or a
 // command, its folder, and its environment with the terminal's variables and, for a login shell,
-// shell integration (Docs/DESIGN.md §5.1; SiliconDesk's PROTOCOL.md §7.1, §7.7).
+// shell integration (Docs/CONNECTIONS.md §1; SiliconDesk's PROTOCOL.md §7.1, §7.7).
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/termhost/termhost.go (LoginShell, TerminalEnv and their

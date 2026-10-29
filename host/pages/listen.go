@@ -1,8 +1,8 @@
 // listen.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: a device's socket for page commands (Docs/DESIGN.md §6.1.2), as the core on the Mac and
+// Purpose: a device's socket for page commands (Docs/WINDOWS.md §3), as the core on the Mac and
 // a relay on a host listen on it: made at its path, mode 0600, in place of whatever was left
 // there; made again when it was removed, as a keeper makes its own again (Docs/KEEPER.md §4); and
 // removed when it closes, unless another took its path meanwhile.

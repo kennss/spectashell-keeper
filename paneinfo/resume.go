@@ -1,11 +1,11 @@
 // resume.go
 // Author: Kennt Kim
-// Created: 2026-10-22 · Last updated: 2026-10-23
+// Created: 2026-10-22 · Last updated: 2026-10-30
 //
 // Purpose: the shell command that resumes the conversation of the coding agent running in front of
 // a terminal — Claude Code or Codex — so that after a restart of the machine, which no shell
-// survives, the app can type it at the reopened shell's prompt (Docs/DESIGN.md §5.3, SiliconDesk's
-// Docs/apps/sdterm.md §2.3).
+// survives, the app can type it at the reopened shell's prompt (Docs/CONNECTIONS.md §3,
+// SiliconDesk's Docs/apps/sdterm.md §2.3).
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/apps/terminal/restart.go on 2026-10-23: its resume logic

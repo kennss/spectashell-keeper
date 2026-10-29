@@ -1,6 +1,6 @@
 // client.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: a client's side of the keeper protocol (Docs/KEEPER.md): starting a keeper for a new
 // terminal, connecting to one (new or left from before), reading its output and exit, sending
@@ -9,7 +9,7 @@
 // Notes:
 // - Taken from SiliconDesk's host/internal/keeper/client.go on 2026-10-23. Changed: a connection is
 //   any byte stream (NewConn), so a keeper reached over SSH through `attach` is one too
-//   (Docs/DESIGN.md §5.3); ReadEvents returns ErrTakenOver when another client took the keeper
+//   (Docs/CONNECTIONS.md §3); ReadEvents returns ErrTakenOver when another client took the keeper
 //   over; List reads the keepers' descriptions without connecting to any. Where these notes say
 //   "session", read the client.
 // - Start runs `command` (the session binary with "keep", or a test helper) in a session of its own
@@ -17,7 +17,7 @@
 //   it ends first.
 // - Writes come from the session's loop and its goroutines alike; they are serialised.
 // - Closing a Conn without Hangup detaches: the keeper keeps the program for the next session.
-// - Joining (2026-10-26, Docs/DESIGN.md §6.9): DialJoin connects to watch, through the keeper's
+// - Joining (2026-10-26, Docs/TEAMS.md §1): DialJoin connects to watch, through the keeper's
 //   second socket (JoinPath), and fails with ErrCannotJoin at a keeper from before it; SayWho names
 //   the connection and says it can watch, Take moves the keyboard to it, and Events.Present hears
 //   who holds and who watches. A watcher hears Size after the replay too, whenever the terminal's
@@ -64,7 +64,7 @@ type Conn struct {
 func SocketPath(dir, id string) string { return filepath.Join(dir, id+".sock") }
 
 // NewID is a new keeper id: 16 hexadecimal characters, short enough for a socket's path (a Unix
-// socket's is at most 104 bytes on macOS; Docs/DESIGN.md §5.1).
+// socket's is at most 104 bytes on macOS; Docs/CONNECTIONS.md §1).
 func NewID() (string, error) {
 	var b [8]byte
 	if _, err := rand.Read(b[:]); err != nil {

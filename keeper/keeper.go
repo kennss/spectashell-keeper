@@ -1,6 +1,6 @@
 // keeper.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: the keeper process (`spectashell-keeper keep`, Docs/KEEPER.md): it holds one terminal
 // program on its pseudo-terminal, keeps the program's recent output, and serves its clients over
@@ -10,8 +10,8 @@
 // Notes:
 // - Taken from SiliconDesk's host/internal/keeper/keeper.go on 2026-10-23. Grown in sdTerm: the
 //   description beside the socket (describe), TakenOver before a connection is closed for another,
-//   and refreshing the times of the socket, the description and their folders (refreshTimes),
-//   which SiliconDesk's session did and here no session does (Docs/DESIGN.md §5.3); and what runs in
+//   and refreshing the times of the socket, the description and their folders (refreshTimes), which
+//   SiliconDesk's session did and here no session does (Docs/CONNECTIONS.md §3); and what runs in
 //   the shell (watchInfo, the engine's paneinfo), read here beside the shell — on whichever machine
 //   it is — every infoEvery while a client is connected, and sent as Info when it changed and to
 //   every client that connects.
@@ -36,7 +36,7 @@
 //   it on a pane (watchInfo); a keeper whose program is not a shell never ends it so, since its
 //   program is always in front.
 // - Where these notes say "session", read the client: whoever is connected.
-// - Joining (2026-10-26, Docs/DESIGN.md §6.9): a connection on the second socket (JoinPath)
+// - Joining (2026-10-26, Docs/TEAMS.md §1): a connection on the second socket (JoinPath)
 //   watches; one connection at most holds the keyboard (holder), the rest watch (watchers), and a
 //   watcher takes the keyboard with Take. A connection on the first socket takes the keyboard from
 //   the holder, who is TakenOver and closed as before; watchers stay. Every connection is written

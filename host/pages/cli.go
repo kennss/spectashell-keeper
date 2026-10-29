@@ -1,9 +1,9 @@
 // cli.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: `spectashell-keeper page <command>`, an agent's command to the page beside its shell
-// (Docs/DESIGN.md §6.1.2), for any agent that runs commands: its arguments read into a request,
+// (Docs/WINDOWS.md §3), for any agent that runs commands: its arguments read into a request,
 // asked (ask.go), and the answer printed — or written, for a screenshot.
 //
 // Notes:

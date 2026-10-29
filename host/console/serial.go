@@ -1,9 +1,9 @@
 // serial.go
 // Author: Kennt Kim
-// Created: 2026-10-27 · Last updated: 2026-10-29
+// Created: 2026-10-27 · Last updated: 2026-10-30
 //
-// Purpose: a serial port opened as a console needs it (Docs/DESIGN.md §5.8): raw, at the speed and
-// framing asked for (8N1 and the rest), with the flow control asked for, held exclusively so a
+// Purpose: a serial port opened as a console needs it (Docs/CONNECTIONS.md §6): raw, at the speed
+// and framing asked for (8N1 and the rest), with the flow control asked for, held exclusively so a
 // second program does not read half of its bytes; and the ports a machine has, for the app to
 // choose from.
 //

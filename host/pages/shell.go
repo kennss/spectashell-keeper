@@ -1,8 +1,8 @@
 // shell.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: the shell an agent's page command runs in (Docs/DESIGN.md §6.1.2): the keeper holding
+// Purpose: the shell an agent's page command runs in (Docs/WINDOWS.md §3): the keeper holding
 // it, and the socket of the device that holds that keeper now. A command acts on the pages beside
 // its own shell only, so it must know which shell that is.
 //

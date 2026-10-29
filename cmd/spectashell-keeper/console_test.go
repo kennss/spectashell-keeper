@@ -1,11 +1,11 @@
 // console_test.go
 // Author: Kennt Kim
-// Created: 2026-10-29 · Last updated: 2026-10-29
+// Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper's consoles as a keeper runs them (Docs/DESIGN.md §5.8), the real binary on
-// a pseudo-terminal as a keeper gives it one: serial on another pseudo-terminal standing in for an
-// adapter, its bytes both ways raw — Control-C reaching the board as a byte, not a signal — and
-// Release Port letting a second console have it; telnet to a server on loopback, ended by the
+// Purpose: spectashell-keeper's consoles as a keeper runs them (Docs/CONNECTIONS.md §6), the real
+// binary on a pseudo-terminal as a keeper gives it one: serial on another pseudo-terminal standing
+// in for an adapter, its bytes both ways raw — Control-C reaching the board as a byte, not a signal
+// — and Release Port letting a second console have it; telnet to a server on loopback, ended by the
 // server; serial-ports printing JSON; and arguments it cannot use refused.
 //
 // Notes:

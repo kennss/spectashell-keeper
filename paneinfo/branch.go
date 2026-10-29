@@ -1,8 +1,8 @@
 // branch.go
 // Author: Kennt Kim
-// Created: 2026-10-20 · Last updated: 2026-10-23
+// Created: 2026-10-20 · Last updated: 2026-10-30
 //
-// Purpose: the git branch of a terminal's directory (Docs/DESIGN.md §5.3) — the one read that
+// Purpose: the git branch of a terminal's directory (Docs/CONNECTIONS.md §3) — the one read that
 // touches the terminal's file system — without running git; and the mounted file systems that say
 // whether a directory is on a network share (Linux's mountinfo here, macOS's in system_darwin.go).
 //

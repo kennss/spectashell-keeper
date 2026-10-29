@@ -1,11 +1,11 @@
 // mcp.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: `spectashell-keeper mcp`, the page commands as an MCP server (Model Context Protocol) on
 // standard input and output, for agents that take tools — Claude Code
 // (`claude mcp add spectashell -- <keeper program> mcp`), Codex — rather than run commands
-// (Docs/DESIGN.md §6.1.2). Each tool is a page command (cli.go's), asked of the pages beside the
+// (Docs/WINDOWS.md §3). Each tool is a page command (cli.go's), asked of the pages beside the
 // shell the agent runs in (ask.go).
 //
 // Notes:

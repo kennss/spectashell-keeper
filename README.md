@@ -1,6 +1,6 @@
 # spectashell-keeper — the terminal engine and the keeper SpectaShell puts on a host
 
-> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-10-29
+> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-10-30
 >
 > Licensed under the Apache License 2.0 ([LICENSE](LICENSE)). Copyright 2026 Calida Lab.
 
@@ -83,6 +83,6 @@ inside the Mac app is signed with the app.
 
 The code is written inside SpectaShell's own repository, which mounts this one at `engine/`. So a
 comment's path that starts `engine/` is a path here, and the comments and documents name parts of
-SpectaShell that are not published: its design (`Docs/DESIGN.md §…`), the app's Go
-(`core/internal/…`) and Swift (`client/…`). Parts of the emulator and the keeper came from
-SiliconDesk, by the same author; their headers say which file.
+SpectaShell that are not published: its design (`Docs/DESIGN.md §…` and its parts, such as
+`Docs/CONNECTIONS.md §3`), the app's Go (`core/internal/…`) and Swift (`client/…`). Parts of the
+emulator and the keeper came from SiliconDesk, by the same author; their headers say which file.

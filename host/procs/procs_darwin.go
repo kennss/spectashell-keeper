@@ -1,11 +1,11 @@
 // procs_darwin.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: this user's processes and the program each runs, on macOS. The core tells this Mac's
 // own keepers from those a connection to it started by their program (bus/keepers.go), and the
 // keeper program names the builds whose programs run, so the installer keeps their folders
-// (hostkeeper.BuildsInUse, Docs/DESIGN.md §5.3).
+// (hostkeeper.BuildsInUse, Docs/CONNECTIONS.md §3).
 //
 // Notes:
 // - Moved here from core/internal/bus (executable_darwin.go, 2026-10-25) on 2026-10-26, when the

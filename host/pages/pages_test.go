@@ -1,8 +1,8 @@
 // pages_test.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: the pieces of an agent's page commands (Docs/DESIGN.md §6.1.2) on their own: a command
+// Purpose: the pieces of an agent's page commands (Docs/WINDOWS.md §3) on their own: a command
 // finds its shell's keeper by the variable, else by its parents, and the device holding it; a
 // device's socket replaces one left at its path, comes back when removed, and leaves a newer one's
 // path alone; a relay passes requests and replies through its channel, and tells its askers when

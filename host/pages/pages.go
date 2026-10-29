@@ -1,8 +1,8 @@
 // pages.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: a coding agent's commands to the page beside its shell (Docs/DESIGN.md §6.1.2): what a
+// Purpose: a coding agent's commands to the page beside its shell (Docs/WINDOWS.md §3): what a
 // command and its reply are, where a device's socket for them is, and asking one. The agent runs
 // the keeper program (`spectashell-keeper page …`, cli.go; `spectashell-keeper mcp`, mcp.go); the command
 // finds the keeper of its shell (shell.go) and the device that holds it, and asks that device's

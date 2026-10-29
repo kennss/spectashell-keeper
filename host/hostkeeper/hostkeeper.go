@@ -1,10 +1,10 @@
 // hostkeeper.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: what spectashell-keeper's commands on a host read and print (Docs/DESIGN.md §5.3) — start a
-// keeper for a terminal, list the keepers there with the host's boot, the builds in use — and
-// doing the listing, which the program does for its host and the core for the Mac's own local
+// Purpose: what spectashell-keeper's commands on a host read and print (Docs/CONNECTIONS.md §3) —
+// start a keeper for a terminal, list the keepers there with the host's boot, the builds in use —
+// and doing the listing, which the program does for its host and the core for the Mac's own local
 // shells (ListFolder).
 //
 // Notes:
@@ -35,8 +35,8 @@ import (
 )
 
 // Itself, as the first word of a program a keeper runs, names the keeper program on that machine
-// (KeeperProgram): a console — `spectashell-keeper serial …`, `spectashell-keeper telnet …` (Docs/DESIGN.md
-// §5.8) — runs from wherever that machine has it, which the app does not know.
+// (KeeperProgram): a console — `spectashell-keeper serial …`, `spectashell-keeper telnet …`
+// (Docs/CONNECTIONS.md §6) — runs from wherever that machine has it, which the app does not know.
 const Itself = "spectashell-keeper"
 
 // KeeperProgram is argv with Itself, as its first word, made path: the keeper program here.

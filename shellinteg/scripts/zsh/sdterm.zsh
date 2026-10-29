@@ -1,6 +1,6 @@
 # sdterm.zsh
 # Author: Kennt Kim
-# Created: 2026-10-19 · Last updated: 2026-10-23
+# Created: 2026-10-19 · Last updated: 2026-10-30
 #
 # Purpose: the terminal engine's shell integration for zsh (SiliconDesk's SDTERM-2.md §4.3,
 # PROTOCOL.md §7.7): marks each prompt, command line, command output and command end with OSC 133,
@@ -9,7 +9,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/zsh/sdterm.zsh on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/DESIGN.md §5.1).
+#   engine's user (Docs/CONNECTIONS.md §1).
 # - Loaded by .zshenv, before the user's .zshrc: the hooks are installed at the first prompt, after
 #   the startup files, so a theme that marks prompts itself (Powerlevel10k's shell integration,
 #   `]133;` in PS1) is left alone. On that first prompt a theme's own precmd may set PS1 after ours,

@@ -1,6 +1,6 @@
 # sdterm.bash
 # Author: Kennt Kim
-# Created: 2026-10-19 · Last updated: 2026-10-23
+# Created: 2026-10-19 · Last updated: 2026-10-30
 #
 # Purpose: the terminal engine's shell integration for bash (SiliconDesk's SDTERM-2.md §4.3,
 # PROTOCOL.md §7.7): marks each prompt, command line, command output and command end with OSC 133,
@@ -10,7 +10,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/bash/sdterm.bash on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/DESIGN.md §5.1).
+#   engine's user (Docs/CONNECTIONS.md §1).
 # - The session starts the login shell as `-bash --posix` with ENV naming this file and
 #   SDTERM_BASH_INJECT set: in POSIX mode an interactive bash reads only $ENV, so this file runs
 #   first. Sourced from a ~/.bashrc (another host's) it only sets the marks. It ends POSIX mode and reads the

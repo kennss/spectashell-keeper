@@ -1,6 +1,6 @@
 // link.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: the Link — what carries one program's input and output to a terminal (Docs/DESIGN.md
 // §3.2, §5). The terminal knows no transport: a keeper on this machine, a keeper reached over
@@ -14,7 +14,7 @@
 // - ReadEvents runs on the terminal's reader goroutine until the link ends, and returns why:
 //   keeper.ErrTakenOver when another client took the keeper over.
 // - A link that can share its program with other clients is also Joinable (a keeper's,
-//   2026-10-26, Docs/DESIGN.md §6.9): it names this client and takes the keyboard.
+//   2026-10-26, Docs/TEAMS.md §1): it names this client and takes the keyboard.
 
 //go:build unix
 

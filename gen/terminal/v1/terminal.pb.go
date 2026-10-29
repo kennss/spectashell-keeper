@@ -1,6 +1,6 @@
 // terminal.proto
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: the terminal engine's messages: opening a terminal, what happens in it (events), the
 // frames its views draw, and the input they send back (Docs/DESIGN.md §3.1, §3.2). They are the
@@ -11,7 +11,7 @@
 //   its fields, numbers and meanings kept. Changed: its own package; no app instance ids (a
 //   terminal is named by terminal_id alone; their field numbers are reserved); TerminalColors
 //   moved in from SiliconDesk's common.proto; no path queries (files are the app layer's,
-//   DESIGN.md §5.5). Where SiliconDesk's comments say "session", read the engine; "app", the
+//   FILES.md §1). Where SiliconDesk's comments say "session", read the engine; "app", the
 //   engine's user; "client", the views. Section numbers name SiliconDesk's PROTOCOL.md.
 // - The session is the only terminal emulator. The client never parses terminal output: it
 //   receives the emulated screen as frames (changed rows, scrolled-off lines, cursor, modes) and

@@ -1,12 +1,12 @@
 // paneinfo.go
 // Author: Kennt Kim
-// Created: 2026-10-20 · Last updated: 2026-10-29
+// Created: 2026-10-20 · Last updated: 2026-10-30
 //
-// Purpose: what runs in a terminal (Docs/DESIGN.md §5.1, §5.3) — the program in front and its
-// process id, its folder, the git branch, the ports the terminal's processes listen on, the host
-// when the program is ssh, and the command that resumes a coding agent running in front. A
-// terminal's keeper reads it for its own shell every few seconds (Reader.Read), on the machine the
-// shell runs on, and sends it to the app when it changed.
+// Purpose: what runs in a terminal (Docs/CONNECTIONS.md §1, CONNECTIONS.md §3) — the program in
+// front and its process id, its folder, the git branch, the ports the terminal's processes listen
+// on, the host when the program is ssh, and the command that resumes a coding agent running in
+// front. A terminal's keeper reads it for its own shell every few seconds (Reader.Read), on the
+// machine the shell runs on, and sends it to the app when it changed.
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/paneinfo/paneinfo.go on 2026-10-23. There one host

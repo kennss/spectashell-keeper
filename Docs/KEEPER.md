@@ -1,6 +1,6 @@
 # The keeper protocol
 
-> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-10-29
+> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-10-30
 >
 > Status: **version 1, forever.** It only grows: any later build must talk to a keeper an earlier
 > build started. Code: `engine/keeper/protocol.go` (the format), `keeper.go` (the keeper),
@@ -65,7 +65,7 @@ program has ended; then live output.
 **The kept output is sent at the sizes it was written at.** *(sdTerm, 2026-10-23.)* A program
 writes for the size it was told, so output drawn at another width wraps where the program did not
 mean it to: zsh's end-of-line mark, written at 80 columns and drawn at 69, leaves a `%` above every
-prompt (Docs/DESIGN.md §5.1). The keeper remembers where in its kept output each Resize took
+prompt (Docs/CONNECTIONS.md §1). The keeper remembers where in its kept output each Resize took
 effect, and the replay sends Size before each stretch of one size: the first before any output,
 the last with the size now, followed by no output when nothing was written since. A client draws
 each stretch at its size, then goes on at its own. A client from before Size skips it and draws the
@@ -79,7 +79,7 @@ taken over; the connections watching stay (§2.1).
 
 ### 2.1 Joining
 
-*(sdTerm, 2026-10-26; Docs/DESIGN.md §6.9.)* A connection on the second socket, `<keeper id>.join`,
+*(sdTerm, 2026-10-26; Docs/TEAMS.md §1.)* A connection on the second socket, `<keeper id>.join`,
 joins the keeper to watch: it gets Hello and the replay as any connection does, and takes nothing
 from anyone. Of all the keeper's connections one at most holds the keyboard, and the others watch.
 
@@ -151,7 +151,7 @@ age-based cleaning of `/tmp` (systemd-tmpfiles) never removes them while it runs
 the sockets first, then the description, in their folder made again (0700) — every 10 seconds, and
 at once on SIGUSR1, as tmux does with its socket. The listener it replaces is closed without
 unlinking the path, which is the new socket's by then. An app cleaner that removes the app's
-folder no longer leaves shells running out of every client's reach (DESIGN.md §5.1).
+folder no longer leaves shells running out of every client's reach (CONNECTIONS.md §1).
 
 ## 5. Where keepers live
 

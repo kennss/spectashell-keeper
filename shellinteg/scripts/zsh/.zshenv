@@ -1,6 +1,6 @@
 # .zshenv
 # Author: Kennt Kim
-# Created: 2026-10-19 · Last updated: 2026-10-23
+# Created: 2026-10-19 · Last updated: 2026-10-30
 #
 # Purpose: loads the terminal engine's shell integration into zsh (Docs/SDTERM-2.md §4.3) without
 # touching the user's files: the session starts zsh with ZDOTDIR naming this directory, so zsh reads
@@ -11,7 +11,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/zsh/.zshenv on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/DESIGN.md §5.1).
+#   engine's user (Docs/CONNECTIONS.md §1).
 
 _sdterm_dir=$ZDOTDIR
 if [[ -n ${SDTERM_ZDOTDIR+x} ]]; then

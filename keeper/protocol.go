@@ -1,6 +1,6 @@
 // protocol.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: the keeper protocol (Docs/KEEPER.md) — how a client talks to the keeper process that
 // holds a terminal program. It is version 1 forever: any later build must be able to talk to a
@@ -31,7 +31,7 @@
 //   its description goes with it, so a device that held the shell can say what became of it.
 // - A keeper may hold a terminal program or a web app's server (Docs/apps/webapps.md §2.4): one
 //   with Meta.Server set is a server, which no terminal adopts.
-// - Joining (sdTerm, 2026-10-26; Docs/DESIGN.md §6.9): a keeper also listens on a second socket
+// - Joining (sdTerm, 2026-10-26; Docs/TEAMS.md §1): a keeper also listens on a second socket
 //   beside the first (JoinPath, `<id>.join`), and a connection there watches instead of taking the
 //   keeper over. Of all the keeper's connections one at most holds the keyboard — its Input reaches
 //   the program and its Resize sizes the terminal — and the others watch: they get the output,
@@ -233,7 +233,7 @@ type Description struct {
 	Watchers []Who `json:"watchers,omitempty"`
 }
 
-// Info is what runs in the shell, as the keeper reads it beside it (Docs/DESIGN.md §5.3; the
+// Info is what runs in the shell, as the keeper reads it beside it (Docs/CONNECTIONS.md §3; the
 // engine's paneinfo).
 type Info struct {
 	Program    string     `json:"program"`
