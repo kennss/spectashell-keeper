@@ -11,7 +11,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/zsh/.zshenv on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/CONNECTIONS.md §1).
+#   engine's user (Docs/design/02-CONNECTIONS.md §1).
 
 _sdterm_dir=$ZDOTDIR
 if [[ -n ${SDTERM_ZDOTDIR+x} ]]; then

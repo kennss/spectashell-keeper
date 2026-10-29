@@ -2,12 +2,12 @@
 // Author: Kennt Kim
 // Created: 2026-10-26 · Last updated: 2026-10-30
 //
-// Purpose: joining a keeper to watch (Docs/KEEPER.md §2, Docs/TEAMS.md §1): a client that joins
-// sees the shell without taking it over, and cannot type into it or end it; Take moves the
+// Purpose: joining a keeper to watch (Docs/KEEPER.md §2, Docs/design/07-TEAMS.md §1): a client that
+// joins sees the shell without taking it over, and cannot type into it or end it; Take moves the
 // keyboard, and the terminal's size, to it, and the one that held it watches — or is taken over,
-// when it cannot watch; a client taking the keeper over leaves the watchers watching; a keeper
-// from before joining cannot be joined, and is not taken over by the attempt; and a watcher that
-// stops reading never holds the shell back.
+// when it cannot watch; a client taking the keeper over leaves the watchers watching; a keeper from
+// before joining cannot be joined, and is not taken over by the attempt; and a watcher that stops
+// reading never holds the shell back.
 
 //go:build unix
 

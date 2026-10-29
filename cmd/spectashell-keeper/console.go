@@ -2,9 +2,9 @@
 // Author: Kennt Kim
 // Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper's consoles (Docs/CONNECTIONS.md §6): a serial port, or a telnet
-// session, run as the program of a keeper where a shell would be — so it stays open with the app
-// closed, and is listed, replayed, opened and watched as a kept shell is — and the serial ports
+// Purpose: spectashell-keeper's consoles (Docs/design/02-CONNECTIONS.md §6): a serial port, or a
+// telnet session, run as the program of a keeper where a shell would be — so it stays open with the
+// app closed, and is listed, replayed, opened and watched as a kept shell is — and the serial ports
 // this machine has, for the app to choose from.
 //
 // Usage:
@@ -17,7 +17,7 @@
 //   - Standard input and output are the keeper's terminal, put in raw mode first (console.MakeRaw).
 //   - A serial console holds the Mac awake while it runs (console.KeepAwake) and says so.
 // - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package main
 

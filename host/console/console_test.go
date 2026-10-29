@@ -1,6 +1,6 @@
 // console_test.go
 // Author: Kennt Kim
-// Created: 2026-10-29 · Last updated: 2026-10-29
+// Created: 2026-10-29 · Last updated: 2026-10-30
 //
 // Purpose: tests of the console bridge and the serial port: bytes both ways; the app's Release
 // Port, Reopen Port and Send Break, typing dropped while released; a sequence that is not the
@@ -12,7 +12,7 @@
 //   - The remote is one end of net.Pipe, the terminal a pair of os.Pipes; every step waits on the
 //     bytes it expects, never on a clock.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package console
 

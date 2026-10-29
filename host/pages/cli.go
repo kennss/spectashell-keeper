@@ -3,8 +3,8 @@
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: `spectashell-keeper page <command>`, an agent's command to the page beside its shell
-// (Docs/WINDOWS.md §3), for any agent that runs commands: its arguments read into a request,
-// asked (ask.go), and the answer printed — or written, for a screenshot.
+// (Docs/design/05-WINDOWS.md §3), for any agent that runs commands: its arguments read into a
+// request, asked (ask.go), and the answer printed — or written, for a screenshot.
 //
 // Notes:
 // - A target is a ref from a snapshot (e12), else a CSS selector; --text names an element by what
@@ -13,7 +13,7 @@
 // - A screenshot goes to --out, else to a new file in the temporary folder, and its path is
 //   printed: an agent reads the picture from the file.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

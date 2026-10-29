@@ -2,15 +2,15 @@
 // Author: Kennt Kim
 // Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: a telnet session as a console a keeper runs (Docs/CONNECTIONS.md §6): the engine's
-// telnet codec as the bridge's Translator, so `spectashell-keeper telnet` is the bridge with a TCP
-// connection where a serial command has its port.
+// Purpose: a telnet session as a console a keeper runs (Docs/design/02-CONNECTIONS.md §6): the
+// engine's telnet codec as the bridge's Translator, so `spectashell-keeper telnet` is the bridge
+// with a TCP connection where a serial command has its port.
 //
 // Notes:
 //   - The codec's opening requests are sent as the connection is made (OpenTelnet), before the
 //     bridge reads anything, as a telnet client sends them.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package console
 

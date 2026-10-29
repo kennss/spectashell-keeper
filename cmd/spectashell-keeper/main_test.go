@@ -2,16 +2,16 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper as the core drives it on a host (Docs/CONNECTIONS.md §3), the real
-// binary over pipes as over SSH exec channels: start prints a keeper's id and leaves it running;
-// list describes it, with this boot's id, without taking it over; attach carries the keeper
-// protocol, a second attach takes the shell over from the first, and Hangup through it ends the
-// keeper; join watches the shell without taking it over (2026-10-26). Every keeper started is hung
-// up when the test ends, failed or not.
+// Purpose: spectashell-keeper as the core drives it on a host (Docs/design/02-CONNECTIONS.md §3),
+// the real binary over pipes as over SSH exec channels: start prints a keeper's id and leaves it
+// running; list describes it, with this boot's id, without taking it over; attach carries the
+// keeper protocol, a second attach takes the shell over from the first, and Hangup through it ends
+// the keeper; join watches the shell without taking it over (2026-10-26). Every keeper started is
+// hung up when the test ends, failed or not.
 //
 // Notes:
 // - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

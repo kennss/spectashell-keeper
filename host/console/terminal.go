@@ -2,15 +2,15 @@
 // Author: Kennt Kim
 // Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: the keeper's terminal as a console needs it (Docs/CONNECTIONS.md §6): raw, so every byte
-// typed reaches the board or the server as typed; and its size, as it is and as it changes, for
-// telnet's NAWS.
+// Purpose: the keeper's terminal as a console needs it (Docs/design/02-CONNECTIONS.md §6): raw, so
+// every byte typed reaches the board or the server as typed; and its size, as it is and as it
+// changes, for telnet's NAWS.
 //
 // Notes:
 //   - The terminal is the keeper's pseudo-terminal, which the console is the only program on; it
 //     goes when the console ends, so its settings need no restoring.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build darwin || linux
 

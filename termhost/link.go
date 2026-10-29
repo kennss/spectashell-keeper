@@ -2,9 +2,9 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: the Link — what carries one program's input and output to a terminal (Docs/DESIGN.md
-// §3.2, §5). The terminal knows no transport: a keeper on this machine, a keeper reached over
-// SSH, or a plain SSH shell are each a Link, and the engine's user picks one.
+// Purpose: the Link — what carries one program's input and output to a terminal
+// (Docs/design/01-DESIGN.md §3.2, §5). The terminal knows no transport: a keeper on this machine, a
+// keeper reached over SSH, or a plain SSH shell are each a Link, and the engine's user picks one.
 //
 // Notes:
 // - A Link speaks in the keeper protocol's terms (keeper.Events, keeper.Meta), since a keeper is
@@ -14,7 +14,7 @@
 // - ReadEvents runs on the terminal's reader goroutine until the link ends, and returns why:
 //   keeper.ErrTakenOver when another client took the keeper over.
 // - A link that can share its program with other clients is also Joinable (a keeper's,
-//   2026-10-26, Docs/TEAMS.md §1): it names this client and takes the keyboard.
+//   2026-10-26, Docs/design/07-TEAMS.md §1): it names this client and takes the keyboard.
 
 //go:build unix
 

@@ -1,6 +1,6 @@
 // boot_darwin.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: this boot's id on the Mac: kern.boottime as "seconds.microseconds", the microseconds in
 // six digits, the form the app's BootID.swift writes for this Mac's own boot. The keeper program
@@ -8,7 +8,7 @@
 //
 // Notes:
 // - Moved here from core/internal/hostboot on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package hostboot
 

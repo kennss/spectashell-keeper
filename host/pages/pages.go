@@ -2,11 +2,12 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: a coding agent's commands to the page beside its shell (Docs/WINDOWS.md §3): what a
-// command and its reply are, where a device's socket for them is, and asking one. The agent runs
-// the keeper program (`spectashell-keeper page …`, cli.go; `spectashell-keeper mcp`, mcp.go); the command
-// finds the keeper of its shell (shell.go) and the device that holds it, and asks that device's
-// socket — the core itself on the Mac, a relay on a host (relay.go) — which passes it to the app.
+// Purpose: a coding agent's commands to the page beside its shell (Docs/design/05-WINDOWS.md §3):
+// what a command and its reply are, where a device's socket for them is, and asking one. The agent
+// runs the keeper program (`spectashell-keeper page …`, cli.go; `spectashell-keeper mcp`, mcp.go);
+// the command finds the keeper of its shell (shell.go) and the device that holds it, and asks that
+// device's socket — the core itself on the Mac, a relay on a host (relay.go) — which passes it to
+// the app.
 //
 // Notes:
 // - A socket takes one request: the asker writes a Request as JSON, reads one Reply and closes.
@@ -17,7 +18,7 @@
 //   it (keeper.EnsurePrivateDir): anyone who reaches a device's socket drives its pages.
 // - Args are PageAgent.js's arguments (client/sdTerm/Shared), passed to the app as they are.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package pages
 

@@ -2,11 +2,12 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: page commands from a host to the device that holds a shell there (Docs/WINDOWS.md
-// §3). The core runs `spectashell-keeper pages-relay <device>` over an exec channel of each
-// connection to a host whose shells are kept; the relay listens at the device's socket there and
-// passes each request through the channel's standard output, and each reply back through its
-// standard input, to the core, which answers it (ServeRelay). No port is opened on either side.
+// Purpose: page commands from a host to the device that holds a shell there
+// (Docs/design/05-WINDOWS.md §3). The core runs `spectashell-keeper pages-relay <device>` over an
+// exec channel of each connection to a host whose shells are kept; the relay listens at the
+// device's socket there and passes each request through the channel's standard output, and each
+// reply back through its standard input, to the core, which answers it (ServeRelay). No port is
+// opened on either side.
 //
 // Notes:
 // - The channel carries JSON envelopes one after another: first the relay's {"ready": <socket>}
@@ -17,7 +18,7 @@
 // - A reply not come within replyTimeout is answered as not come: a `wait` lasts at most 30
 //   seconds, and the app answers every other command at once.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

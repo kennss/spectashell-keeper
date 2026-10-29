@@ -1,12 +1,12 @@
 // boot_linux.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: this boot's id on Linux, which changes with every restart (/proc's boot_id).
 //
 // Notes:
 // - Moved here from core/internal/hostboot on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package hostboot
 

@@ -31,17 +31,17 @@
 //   its description goes with it, so a device that held the shell can say what became of it.
 // - A keeper may hold a terminal program or a web app's server (Docs/apps/webapps.md §2.4): one
 //   with Meta.Server set is a server, which no terminal adopts.
-// - Joining (sdTerm, 2026-10-26; Docs/TEAMS.md §1): a keeper also listens on a second socket
-//   beside the first (JoinPath, `<id>.join`), and a connection there watches instead of taking the
-//   keeper over. Of all the keeper's connections one at most holds the keyboard — its Input reaches
-//   the program and its Resize sizes the terminal — and the others watch: they get the output,
-//   the exit and Info as the holder does, and Size whenever the terminal's size changes, also after
-//   the replay; their Input, Meta and Stop are ignored, their Hangup only detaches them, and their
-//   Resize is remembered for when they hold the keyboard. Who (client -> keeper) names a
-//   connection and says it can watch; Take (client -> keeper) moves the keyboard to a watcher, and
-//   the holder watches from then on if it said Who, else it is TakenOver as before. Present
-//   (keeper -> client) tells every connection that said Who, or joined, whether it holds the
-//   keyboard, who does, and who watches, whenever that changes. A keeper from before has no
+// - Joining (sdTerm, 2026-10-26; Docs/design/07-TEAMS.md §1): a keeper also listens on a second
+//   socket beside the first (JoinPath, `<id>.join`), and a connection there watches instead of
+//   taking the keeper over. Of all the keeper's connections one at most holds the keyboard — its
+//   Input reaches the program and its Resize sizes the terminal — and the others watch: they get
+//   the output, the exit and Info as the holder does, and Size whenever the terminal's size
+//   changes, also after the replay; their Input, Meta and Stop are ignored, their Hangup only
+//   detaches them, and their Resize is remembered for when they hold the keyboard. Who (client ->
+//   keeper) names a connection and says it can watch; Take (client -> keeper) moves the keyboard to
+//   a watcher, and the holder watches from then on if it said Who, else it is TakenOver as before.
+//   Present (keeper -> client) tells every connection that said Who, or joined, whether it holds
+//   the keyboard, who does, and who watches, whenever that changes. A keeper from before has no
 //   `<id>.join`: joining it fails, and never takes it over.
 // - Unknown frame types are skipped and unknown JSON keys ignored, so either side may add types
 //   or keys later; nothing existing may change meaning.
@@ -233,8 +233,8 @@ type Description struct {
 	Watchers []Who `json:"watchers,omitempty"`
 }
 
-// Info is what runs in the shell, as the keeper reads it beside it (Docs/CONNECTIONS.md §3; the
-// engine's paneinfo).
+// Info is what runs in the shell, as the keeper reads it beside it (Docs/design/02-CONNECTIONS.md
+// §3; the engine's paneinfo).
 type Info struct {
 	Program    string     `json:"program"`
 	ProgramPID int        `json:"program_pid"`

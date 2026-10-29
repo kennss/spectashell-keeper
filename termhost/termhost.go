@@ -3,14 +3,14 @@
 // Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: one live terminal — a program reached through a Link (link.go), the emulator that models
-// its screen (package term), and the plumbing between them (Docs/DESIGN.md §3, §5).
+// its screen (package term), and the plumbing between them (Docs/design/01-DESIGN.md §3, §5).
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/termhost/termhost.go on 2026-10-23. Changed: the
 //   program is reached through a Link, not only a keeper connection, and is started by the
 //   engine's user (launch.go, keeper.Start); a link that ends without the program's exit is
 //   reported as lost (OnLost), never as the program's end — SiliconDesk's reported it as an exit
-//   with code -1, which made a shell another device took over look ended (DESIGN.md §10).
+//   with code -1, which made a shell another device took over look ended (01-DESIGN.md §10).
 // - Every link begins with a replay: a keeper's of the program's recent output, which rebuilds
 //   the screen in a fresh emulator; a link with no memory (a plain SSH shell) an empty one.
 //   Replies the emulator would send for replayed output (cursor reports and the like) are not
@@ -35,7 +35,7 @@
 //   no known start unless the shell gave one (shell integration).
 // - Close hangs the program up (SIGHUP, through the link); Detach leaves it to its keeper, when
 //   the link has one, for the next attach.
-// - Watching (2026-10-26, Docs/TEAMS.md §1): a terminal on a link that joined a keeper
+// - Watching (2026-10-26, Docs/design/07-TEAMS.md §1): a terminal on a link that joined a keeper
 //   (Config.Watch) watches until it takes the keyboard (Take), and one that held it watches once
 //   another takes it (the keeper's Present). Watching, its screen has the program's size, which the
 //   keeper sends whenever it changes, not the views'; what the user types and the emulator's

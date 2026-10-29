@@ -2,61 +2,68 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper, the program that holds a shell (Docs/CONNECTIONS.md §1,
-// CONNECTIONS.md §3; the keeper itself is the engine's, engine/keeper). The Mac app carries it for
-// its local shells; the core puts it on hosts that allow it and drives it there over SSH exec
+// Purpose: spectashell-keeper, the program that holds a shell (Docs/design/02-CONNECTIONS.md §1,
+// 02-CONNECTIONS.md §3; the keeper itself is the engine's, engine/keeper). The Mac app carries it
+// for its local shells; the core puts it on hosts that allow it and drives it there over SSH exec
 // channels.
 //
 // Usage:
-//   spectashell-keeper keep         the keeper itself: a keeper.Config on standard input (keeper.Main)
-//   spectashell-keeper start        a StartRequest (JSON) on standard input; starts a keeper for it in a
-//                              session of its own and prints {"keeper_id": …} — or {"error": …}
+//   spectashell-keeper keep
+//       the keeper itself: a keeper.Config on standard input (keeper.Main)
+//   spectashell-keeper start
+//       a StartRequest (JSON) on standard input; starts a keeper for it in a session of its own and
+//       prints {"keeper_id": …} — or {"error": …}
 //   spectashell-keeper attach <id> [--agent]
-//                              copies standard input and output to that keeper's socket, unchanged:
-//                              the keeper protocol travels through an exec channel; with --agent,
-//                              points the keeper's agent link at SSH_AUTH_SOCK, the agent forwarded
-//                              to this channel, while it holds the keeper
-//   spectashell-keeper join <id>    the same through the keeper's socket for joining, to watch without
-//                              taking it over (Docs/TEAMS.md §1); exits 3, saying so, when the
-//                              keeper is from a build that cannot be joined
-//   spectashell-keeper list         prints {"boot": …, "keepers": [descriptions]} without connecting to
-//                              any keeper (connecting would take it over)
-//   spectashell-keeper version      prints "spectashell-keeper <build>", for the installer
-//   spectashell-keeper builds       prints {"builds": […]}: the builds a keeper here, or any other
-//                              program of this user's, runs from, whose folders the installer keeps
-//                              (hostkeeper.BuildsInUse)
-//   spectashell-keeper page <cmd>   a coding agent's command to the page beside its shell in SpectaShell
-//                              (host/pages, cli.go; Docs/WINDOWS.md §3)
-//   spectashell-keeper mcp          the same commands as an MCP server on standard input and output
+//       copies standard input and output to that keeper's socket, unchanged: the keeper protocol
+//       travels through an exec channel; with --agent, points the keeper's agent link at
+//       SSH_AUTH_SOCK, the agent forwarded to this channel, while it holds the keeper
+//   spectashell-keeper join <id>
+//       the same through the keeper's socket for joining, to watch without taking it over
+//       (Docs/design/07-TEAMS.md §1); exits 3, saying so, when the keeper is from a build that
+//       cannot be joined
+//   spectashell-keeper list
+//       prints {"boot": …, "keepers": [descriptions]} without connecting to any keeper (connecting
+//       would take it over)
+//   spectashell-keeper version
+//       prints "spectashell-keeper <build>", for the installer
+//   spectashell-keeper builds
+//       prints {"builds": […]}: the builds a keeper here, or any other program of this user's, runs
+//       from, whose folders the installer keeps (hostkeeper.BuildsInUse)
+//   spectashell-keeper page <cmd>
+//       a coding agent's command to the page beside its shell in SpectaShell (host/pages, cli.go;
+//       Docs/design/05-WINDOWS.md §3)
+//   spectashell-keeper mcp
+//       the same commands as an MCP server on standard input and output
 //   spectashell-keeper serial [options] <device>, spectashell-keeper telnet <host> [port]
-//                              a serial port, or a telnet session, as the program a keeper runs
-//                              where a shell would be (console.go; Docs/CONNECTIONS.md §6)
-//   spectashell-keeper serial-ports prints {"ports": […]}: this machine's serial ports
+//       a serial port, or a telnet session, as the program a keeper runs where a shell would be
+//       (console.go; Docs/design/02-CONNECTIONS.md §6)
+//   spectashell-keeper serial-ports
+//       prints {"ports": […]}: this machine's serial ports
 //   spectashell-keeper pages-relay <device>
-//                              run by the core over an exec channel: the device's socket for page
-//                              commands on this host, passed through the channel (pages/relay.go)
+//       run by the core over an exec channel: the device's socket for page commands on this host,
+//       passed through the channel (pages/relay.go)
 //
 // Notes:
 // - build is set at link time (-ldflags "-X main.build=…") by scripts/build-keeper.sh.
 // - The keepers' folder is the engine's keeper.Place: /tmp/spectashell-<uid>/keepers on Linux,
-//   ~/Library/Application Support/SpectaShell/keepers on macOS, or SDTERM_RUNTIME_DIR; it must be the
-//   user's own, or nothing starts (CONNECTIONS.md §3).
+//   ~/Library/Application Support/SpectaShell/keepers on macOS, or SDTERM_RUNTIME_DIR; it must be
+//   the user's own, or nothing starts (02-CONNECTIONS.md §3).
 // - start prepares the program as the Mac app's core does for a local shell (termhost.Prepare):
 //   the login shell with the terminal's variables, LANG from the request, and shell integration,
 //   whose scripts it writes beside this binary (shell-integration/), from the binary itself.
 // - A shell started with the agent forwarded (StartRequest.Agent) has SSH_AUTH_SOCK name the
 //   keeper's agent link, which `attach <id> --agent` points at the agent forwarded to its channel
 //   while it holds the keeper (keeper/agent.go): a kept shell outlives every connection, and each
-//   forwards an agent of its own (Docs/CONNECTIONS.md §3).
-// - start puts the new keeper's id in the shell's environment (SDTERM_KEEPER_ID), so a page
-//   command run in it, or in a program the shell started and its parents no longer lead to (a
-//   tmux server), finds its shell (pages/shell.go); and the keepers' folder, when SDTERM_RUNTIME_DIR
-//   put it elsewhere, since the shell starts from its login session's variables only.
+//   forwards an agent of its own (Docs/design/02-CONNECTIONS.md §3).
+// - start puts the new keeper's id in the shell's environment (SDTERM_KEEPER_ID), so a page command
+//   run in it, or in a program the shell started and its parents no longer lead to (a tmux server),
+//   finds its shell (pages/shell.go); and the keepers' folder, when SDTERM_RUNTIME_DIR put it
+//   elsewhere, since the shell starts from its login session's variables only.
 // - boot is what changes when the host restarts (Linux's boot_id, the Mac's kern.boottime;
 //   host/hostboot), so the app can tell keepers that ended with a restart from keepers
-//   that were closed (CONNECTIONS.md §3).
+//   that were closed (02-CONNECTIONS.md §3).
 // - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package main
 

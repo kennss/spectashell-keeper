@@ -1,6 +1,6 @@
 // serial_darwin.go
 // Author: Kennt Kim
-// Created: 2026-10-27 · Last updated: 2026-10-29
+// Created: 2026-10-27 · Last updated: 2026-10-30
 //
 // Purpose: a serial port's settings on macOS: termios through TIOCGETA and TIOCSETA, a standard
 // speed with them, any other through IOSSIOSPEED — termios alone takes only the standard ones, and
@@ -10,7 +10,7 @@
 //   - The ports a console uses are the callout devices, /dev/cu.*: opening /dev/tty.* waits for the
 //     modem's carrier, which a USB adapter never raises.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package console
 

@@ -9,19 +9,19 @@
 // Notes:
 // - Taken from SiliconDesk's host/internal/keeper/client.go on 2026-10-23. Changed: a connection is
 //   any byte stream (NewConn), so a keeper reached over SSH through `attach` is one too
-//   (Docs/CONNECTIONS.md §3); ReadEvents returns ErrTakenOver when another client took the keeper
-//   over; List reads the keepers' descriptions without connecting to any. Where these notes say
-//   "session", read the client.
+//   (Docs/design/02-CONNECTIONS.md §3); ReadEvents returns ErrTakenOver when another client took
+//   the keeper over; List reads the keepers' descriptions without connecting to any. Where these
+//   notes say "session", read the client.
 // - Start runs `command` (the session binary with "keep", or a test helper) in a session of its own
 //   (Setsid), so it is not in the session's process group and outlives it; the session reaps it if
 //   it ends first.
 // - Writes come from the session's loop and its goroutines alike; they are serialised.
 // - Closing a Conn without Hangup detaches: the keeper keeps the program for the next session.
-// - Joining (2026-10-26, Docs/TEAMS.md §1): DialJoin connects to watch, through the keeper's
-//   second socket (JoinPath), and fails with ErrCannotJoin at a keeper from before it; SayWho names
-//   the connection and says it can watch, Take moves the keyboard to it, and Events.Present hears
-//   who holds and who watches. A watcher hears Size after the replay too, whenever the terminal's
-//   size changes.
+// - Joining (2026-10-26, Docs/design/07-TEAMS.md §1): DialJoin connects to watch, through the
+//   keeper's second socket (JoinPath), and fails with ErrCannotJoin at a keeper from before it;
+//   SayWho names the connection and says it can watch, Take moves the keyboard to it, and
+//   Events.Present hears who holds and who watches. A watcher hears Size after the replay too,
+//   whenever the terminal's size changes.
 // - Hangup names the client that hangs up (Who), for the keeper's End (2026-10-26). Ends lists the
 //   Ends in a folder and removes those older than endKept; List leaves an End (EndLost) for a
 //   keeper it finds gone without one.
@@ -64,7 +64,7 @@ type Conn struct {
 func SocketPath(dir, id string) string { return filepath.Join(dir, id+".sock") }
 
 // NewID is a new keeper id: 16 hexadecimal characters, short enough for a socket's path (a Unix
-// socket's is at most 104 bytes on macOS; Docs/CONNECTIONS.md §1).
+// socket's is at most 104 bytes on macOS; Docs/design/02-CONNECTIONS.md §1).
 func NewID() (string, error) {
 	var b [8]byte
 	if _, err := rand.Read(b[:]); err != nil {

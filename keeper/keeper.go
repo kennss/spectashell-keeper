@@ -11,10 +11,10 @@
 // - Taken from SiliconDesk's host/internal/keeper/keeper.go on 2026-10-23. Grown in sdTerm: the
 //   description beside the socket (describe), TakenOver before a connection is closed for another,
 //   and refreshing the times of the socket, the description and their folders (refreshTimes), which
-//   SiliconDesk's session did and here no session does (Docs/CONNECTIONS.md §3); and what runs in
-//   the shell (watchInfo, the engine's paneinfo), read here beside the shell — on whichever machine
-//   it is — every infoEvery while a client is connected, and sent as Info when it changed and to
-//   every client that connects.
+//   SiliconDesk's session did and here no session does (Docs/design/02-CONNECTIONS.md §3); and what
+//   runs in the shell (watchInfo, the engine's paneinfo), read here beside the shell — on whichever
+//   machine it is — every infoEvery while a client is connected, and sent as Info when it changed
+//   and to every client that connects.
 // - A keeper whose socket or description was removed while it runs makes them again (stayReachable):
 //   every reachableEvery, and at once on SIGUSR1, as tmux does with its socket. Without its socket
 //   no client can reach it again, though it and its program run on. A Mac app cleaner removed the
@@ -36,7 +36,7 @@
 //   it on a pane (watchInfo); a keeper whose program is not a shell never ends it so, since its
 //   program is always in front.
 // - Where these notes say "session", read the client: whoever is connected.
-// - Joining (2026-10-26, Docs/TEAMS.md §1): a connection on the second socket (JoinPath)
+// - Joining (2026-10-26, Docs/design/07-TEAMS.md §1): a connection on the second socket (JoinPath)
 //   watches; one connection at most holds the keyboard (holder), the rest watch (watchers), and a
 //   watcher takes the keyboard with Take. A connection on the first socket takes the keyboard from
 //   the holder, who is TakenOver and closed as before; watchers stay. Every connection is written

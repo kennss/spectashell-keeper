@@ -4,7 +4,7 @@
 //
 // Purpose: a telnet connection as a terminal's link (termhost.Link): the server's output to the
 // terminal, its typing to the server, its size told by NAWS — over a TCP connection the app makes
-// itself, with nothing on a host (Docs/CONNECTIONS.md §6).
+// itself, with nothing on a host (Docs/design/02-CONNECTIONS.md §6).
 //
 // Notes:
 //   - Nothing keeps a telnet session: the link has no replay (ReplayEnd comes first), and a

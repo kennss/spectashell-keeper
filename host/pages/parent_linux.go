@@ -1,6 +1,6 @@
 // parent_linux.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: a process's parent on Linux, from /proc/<pid>/stat (shell.go follows them to a
 // keeper's shell).
@@ -9,7 +9,7 @@
 // - The command's name, in parentheses, may hold spaces and parentheses itself, so the fields are
 //   read after the last ")": state, then the parent.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package pages
 

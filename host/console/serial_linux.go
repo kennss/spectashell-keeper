@@ -1,6 +1,6 @@
 // serial_linux.go
 // Author: Kennt Kim
-// Created: 2026-10-27 · Last updated: 2026-10-29
+// Created: 2026-10-27 · Last updated: 2026-10-30
 //
 // Purpose: a serial port's settings on Linux: termios2 (TCGETS2 and TCSETS2), whose BOTHER takes any
 // speed in c_ispeed and c_ospeed — the old termios takes only the B-constants.
@@ -10,7 +10,7 @@
 //   - The ports a console uses: USB adapters (ttyUSB, CDC-ACM boards as ttyACM) and a board's own
 //     UARTs (ttyS, ttyAMA on a Raspberry Pi); /dev/serial/by-id names the USB ones (serial.go).
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package console
 

@@ -2,13 +2,13 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: asking the pages beside the shell this process runs in (Docs/WINDOWS.md §3), for
-// the page command (cli.go) and the MCP server (mcp.go): its keeper found, the device holding it,
-// the request sent to that device's socket and its reply read.
+// Purpose: asking the pages beside the shell this process runs in (Docs/design/05-WINDOWS.md §3),
+// for the page command (cli.go) and the MCP server (mcp.go): its keeper found, the device holding
+// it, the request sent to that device's socket and its reply read.
 //
 // Notes:
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

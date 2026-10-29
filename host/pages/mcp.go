@@ -5,8 +5,8 @@
 // Purpose: `spectashell-keeper mcp`, the page commands as an MCP server (Model Context Protocol) on
 // standard input and output, for agents that take tools — Claude Code
 // (`claude mcp add spectashell -- <keeper program> mcp`), Codex — rather than run commands
-// (Docs/WINDOWS.md §3). Each tool is a page command (cli.go's), asked of the pages beside the
-// shell the agent runs in (ask.go).
+// (Docs/design/05-WINDOWS.md §3). Each tool is a page command (cli.go's), asked of the pages beside
+// the shell the agent runs in (ask.go).
 //
 // Notes:
 // - JSON-RPC 2.0, one message per line: initialize, ping, tools/list and tools/call are answered;
@@ -19,7 +19,7 @@
 //   malformed call is a JSON-RPC error.
 // - The shell is found again at every call: another device may have taken it meanwhile.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

@@ -2,9 +2,9 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: the shell an agent's page command runs in (Docs/WINDOWS.md §3): the keeper holding
-// it, and the socket of the device that holds that keeper now. A command acts on the pages beside
-// its own shell only, so it must know which shell that is.
+// Purpose: the shell an agent's page command runs in (Docs/design/05-WINDOWS.md §3): the keeper
+// holding it, and the socket of the device that holds that keeper now. A command acts on the pages
+// beside its own shell only, so it must know which shell that is.
 //
 // Notes:
 // - SDTERM_KEEPER_ID names the keeper in shells started from 2026-10-25 (KeeperVariable), and
@@ -15,7 +15,7 @@
 // - The keeper's description says which device attached to it last (Meta.ClientID) and whether
 //   one is attached now; a shell no device holds has no page to use.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

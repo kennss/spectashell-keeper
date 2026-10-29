@@ -83,6 +83,7 @@ inside the Mac app is signed with the app.
 
 The code is written inside SpectaShell's own repository, which mounts this one at `engine/`. So a
 comment's path that starts `engine/` is a path here, and the comments and documents name parts of
-SpectaShell that are not published: its design (`Docs/DESIGN.md §…` and its parts, such as
-`Docs/CONNECTIONS.md §3`), the app's Go (`core/internal/…`) and Swift (`client/…`). Parts of the
-emulator and the keeper came from SiliconDesk, by the same author; their headers say which file.
+SpectaShell that are not published: its design (`Docs/design/01-DESIGN.md §…` and its parts, such as
+`Docs/design/02-CONNECTIONS.md §3`), the app's Go (`core/internal/…`) and Swift (`client/…`). Parts
+of the emulator and the keeper came from SiliconDesk, by the same author; their headers say which
+file.

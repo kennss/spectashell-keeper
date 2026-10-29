@@ -2,16 +2,16 @@
 // Author: Kennt Kim
 // Created: 2026-10-29 · Last updated: 2026-10-30
 //
-// Purpose: spectashell-keeper's consoles as a keeper runs them (Docs/CONNECTIONS.md §6), the real
-// binary on a pseudo-terminal as a keeper gives it one: serial on another pseudo-terminal standing
-// in for an adapter, its bytes both ways raw — Control-C reaching the board as a byte, not a signal
-// — and Release Port letting a second console have it; telnet to a server on loopback, ended by the
-// server; serial-ports printing JSON; and arguments it cannot use refused.
+// Purpose: spectashell-keeper's consoles as a keeper runs them (Docs/design/02-CONNECTIONS.md §6),
+// the real binary on a pseudo-terminal as a keeper gives it one: serial on another pseudo-terminal
+// standing in for an adapter, its bytes both ways raw — Control-C reaching the board as a byte, not
+// a signal — and Release Port letting a second console have it; telnet to a server on loopback,
+// ended by the server; serial-ports printing JSON; and arguments it cannot use refused.
 //
 // Notes:
 //   - Every step waits on the bytes it expects, read from the pseudo-terminal.
 // - Moved here from core/cmd/spectashell-keeper on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build darwin || linux
 

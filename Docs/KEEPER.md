@@ -8,10 +8,10 @@
 
 A keeper is a small process that holds one program on a pseudo-terminal, keeps its recent output,
 and serves its clients over Unix sockets — one at a time holding the keyboard, the others watching
-(§2.1) — so the program outlives whoever started it: an
-app that quits or updates, a session that is replaced, a connection that drops (Docs/DESIGN.md §5).
-This is the terminal engine's protocol, not any application's; sdTerm and SiliconDesk speak it
-(SiliconDesk's host defined it, `host/internal/keeper`, 2026-10-14).
+(§2.1) — so the program outlives whoever started it: an app that quits or updates, a session that is
+replaced, a connection that drops (Docs/design/01-DESIGN.md §5). This is the terminal engine's
+protocol, not any application's; sdTerm and SiliconDesk speak it (SiliconDesk's host defined it,
+`host/internal/keeper`, 2026-10-14).
 
 ## 1. Starting a keeper
 
@@ -62,14 +62,14 @@ the program set in output no longer kept, then the last 1 MiB of output from a c
 first escape or newline, so no tail of a sequence is shown as text) — then ReplayEnd; Exit, if the
 program has ended; then live output.
 
-**The kept output is sent at the sizes it was written at.** *(sdTerm, 2026-10-23.)* A program
-writes for the size it was told, so output drawn at another width wraps where the program did not
-mean it to: zsh's end-of-line mark, written at 80 columns and drawn at 69, leaves a `%` above every
-prompt (Docs/CONNECTIONS.md §1). The keeper remembers where in its kept output each Resize took
-effect, and the replay sends Size before each stretch of one size: the first before any output,
-the last with the size now, followed by no output when nothing was written since. A client draws
-each stretch at its size, then goes on at its own. A client from before Size skips it and draws the
-whole replay at one size, as before.
+**The kept output is sent at the sizes it was written at.** *(sdTerm, 2026-10-23.)* A program writes
+for the size it was told, so output drawn at another width wraps where the program did not mean it
+to: zsh's end-of-line mark, written at 80 columns and drawn at 69, leaves a `%` above every prompt
+(Docs/design/02-CONNECTIONS.md §1). The keeper remembers where in its kept output each Resize took
+effect, and the replay sends Size before each stretch of one size: the first before any output, the
+last with the size now, followed by no output when nothing was written since. A client draws each
+stretch at its size, then goes on at its own. A client from before Size skips it and draws the whole
+replay at one size, as before.
 
 **A new connection takes the keeper over.** The keeper sends the connection it had TakenOver, closes
 it, and serves the new one. A client from before TakenOver skips the frame and sees its connection
@@ -79,9 +79,10 @@ taken over; the connections watching stay (§2.1).
 
 ### 2.1 Joining
 
-*(sdTerm, 2026-10-26; Docs/TEAMS.md §1.)* A connection on the second socket, `<keeper id>.join`,
-joins the keeper to watch: it gets Hello and the replay as any connection does, and takes nothing
-from anyone. Of all the keeper's connections one at most holds the keyboard, and the others watch.
+*(sdTerm, 2026-10-26; Docs/design/07-TEAMS.md §1.)* A connection on the second socket,
+`<keeper id>.join`, joins the keeper to watch: it gets Hello and the replay as any connection does,
+and takes nothing from anyone. Of all the keeper's connections one at most holds the keyboard, and
+the others watch.
 
 | | The holder | A watcher |
 |---|---|---|
@@ -151,7 +152,7 @@ age-based cleaning of `/tmp` (systemd-tmpfiles) never removes them while it runs
 the sockets first, then the description, in their folder made again (0700) — every 10 seconds, and
 at once on SIGUSR1, as tmux does with its socket. The listener it replaces is closed without
 unlinking the path, which is the new socket's by then. An app cleaner that removes the app's
-folder no longer leaves shells running out of every client's reach (CONNECTIONS.md §1).
+folder no longer leaves shells running out of every client's reach (02-CONNECTIONS.md §1).
 
 ## 5. Where keepers live
 

@@ -2,17 +2,17 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: the pieces of an agent's page commands (Docs/WINDOWS.md §3) on their own: a command
-// finds its shell's keeper by the variable, else by its parents, and the device holding it; a
-// device's socket replaces one left at its path, comes back when removed, and leaves a newer one's
-// path alone; a relay passes requests and replies through its channel, and tells its askers when
-// the channel ends; the command line reads into requests; and the MCP server answers initialize,
-// lists its tools and calls them against a device's socket. The end to end, from a shell on a host
-// through the core, is the bus's (bus/pages_test.go).
+// Purpose: the pieces of an agent's page commands (Docs/design/05-WINDOWS.md §3) on their own: a
+// command finds its shell's keeper by the variable, else by its parents, and the device holding it;
+// a device's socket replaces one left at its path, comes back when removed, and leaves a newer
+// one's path alone; a relay passes requests and replies through its channel, and tells its askers
+// when the channel ends; the command line reads into requests; and the MCP server answers
+// initialize, lists its tools and calls them against a device's socket. The end to end, from a
+// shell on a host through the core, is the bus's (bus/pages_test.go).
 //
 // Notes:
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

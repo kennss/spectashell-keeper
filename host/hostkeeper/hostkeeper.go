@@ -2,10 +2,10 @@
 // Author: Kennt Kim
 // Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: what spectashell-keeper's commands on a host read and print (Docs/CONNECTIONS.md §3) —
-// start a keeper for a terminal, list the keepers there with the host's boot, the builds in use —
-// and doing the listing, which the program does for its host and the core for the Mac's own local
-// shells (ListFolder).
+// Purpose: what spectashell-keeper's commands on a host read and print
+// (Docs/design/02-CONNECTIONS.md §3) — start a keeper for a terminal, list the keepers there with
+// the host's boot, the builds in use — and doing the listing, which the program does for its host
+// and the core for the Mac's own local shells (ListFolder).
 //
 // Notes:
 // - The binary is at ~/.local/share/spectashell/<build>/spectashell-keeper (Programs; the core's installer
@@ -17,7 +17,7 @@
 //   of this user running from the installer's folder — an attach, a relay, another device's
 //   connection's commands — since a keeper's build alone left those out.
 // - Moved here from core/internal/hostkeeper on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package hostkeeper
 
@@ -36,7 +36,8 @@ import (
 
 // Itself, as the first word of a program a keeper runs, names the keeper program on that machine
 // (KeeperProgram): a console — `spectashell-keeper serial …`, `spectashell-keeper telnet …`
-// (Docs/CONNECTIONS.md §6) — runs from wherever that machine has it, which the app does not know.
+// (Docs/design/02-CONNECTIONS.md §6) — runs from wherever that machine has it, which the app does
+// not know.
 const Itself = "spectashell-keeper"
 
 // KeeperProgram is argv with Itself, as its first word, made path: the keeper program here.

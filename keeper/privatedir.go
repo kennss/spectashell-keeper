@@ -3,8 +3,9 @@
 // Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: the folder that holds keepers' sockets and descriptions, and the check that only the
-// user can reach it (Docs/CONNECTIONS.md §1, CONNECTIONS.md §3). Anyone who can reach a keeper's
-// socket can type into its shell, so a folder that is not the user's own is refused, never used.
+// user can reach it (Docs/design/02-CONNECTIONS.md §1, 02-CONNECTIONS.md §3). Anyone who can reach
+// a keeper's socket can type into its shell, so a folder that is not the user's own is refused,
+// never used.
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/paths/paths.go on 2026-10-23 (EnsurePrivateDir, and the

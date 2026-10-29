@@ -1,11 +1,11 @@
 // frame_bench_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: what a frame costs the core (Docs/DESIGN.md §3.1, M0): a terminal of 200 × 60 cells
-// whose every row changed, in a different colour every few characters — the worst a frame carries
-// short of history — built (Frame) and encoded (proto.Marshal), as the core does before handing it
-// to the app. Run with `go test -bench Frame -run ^$ ./termhost`.
+// Purpose: what a frame costs the core (Docs/design/01-DESIGN.md §3.1, M0): a terminal of 200 × 60
+// cells whose every row changed, in a different colour every few characters — the worst a frame
+// carries short of history — built (Frame) and encoded (proto.Marshal), as the core does before
+// handing it to the app. Run with `go test -bench Frame -run ^$ ./termhost`.
 //
 // Notes:
 // - The terminal sits on a link of its own (memLink) that replays nothing and takes no input, so

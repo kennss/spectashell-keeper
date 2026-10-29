@@ -4,9 +4,9 @@
 # Created: 2026-10-23 · Last updated: 2026-10-30
 #
 # Purpose: builds spectashell-keeper (cmd/spectashell-keeper), the program that holds a shell
-# (Docs/KEEPER.md; SpectaShell's Docs/CONNECTIONS.md §1, CONNECTIONS.md §3): for the Mac app's local
-# shells, one universal binary (arm64 and x86_64); and for hosts, one gzipped binary per system and
-# machine, which the app puts there; with the checksums of the hosts' binaries.
+# (Docs/KEEPER.md; SpectaShell's Docs/design/02-CONNECTIONS.md §1, 02-CONNECTIONS.md §3): for the
+# Mac app's local shells, one universal binary (arm64 and x86_64); and for hosts, one gzipped binary
+# per system and machine, which the app puts there; with the checksums of the hosts' binaries.
 #
 # Usage: scripts/build-keeper.sh <out-dir> <build>
 #   <out-dir>/spectashell-keeper        universal macOS binary; Xcode copies it into

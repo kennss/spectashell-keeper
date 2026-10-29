@@ -1,10 +1,10 @@
 // pacer.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
-// Purpose: when a terminal's frames go to its views (Docs/DESIGN.md §3.1): at most one frame per
-// frameInterval, at most maxUnacked frames the views have not applied, and frames held while the
-// program holds synchronized output, up to syncHold (SiliconDesk's PROTOCOL.md §7.4).
+// Purpose: when a terminal's frames go to its views (Docs/design/01-DESIGN.md §3.1): at most one
+// frame per frameInterval, at most maxUnacked frames the views have not applied, and frames held
+// while the program holds synchronized output, up to syncHold (SiliconDesk's PROTOCOL.md §7.4).
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/session/terminal.go (maybeFlush, flushAfter and their

@@ -2,10 +2,10 @@
 // Author: Kennt Kim
 // Created: 2026-10-27 · Last updated: 2026-10-30
 //
-// Purpose: a serial port opened as a console needs it (Docs/CONNECTIONS.md §6): raw, at the speed
-// and framing asked for (8N1 and the rest), with the flow control asked for, held exclusively so a
-// second program does not read half of its bytes; and the ports a machine has, for the app to
-// choose from.
+// Purpose: a serial port opened as a console needs it (Docs/design/02-CONNECTIONS.md §6): raw, at
+// the speed and framing asked for (8N1 and the rest), with the flow control asked for, held
+// exclusively so a second program does not read half of its bytes; and the ports a machine has, for
+// the app to choose from.
 //
 // Notes:
 //   - The port is opened non-blocking and handed to os.NewFile, so its reads go through the
@@ -19,7 +19,7 @@
 //     serial_linux.go).
 //   - Permission: on Linux a port belongs to the dialout group; the error says so.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build darwin || linux
 

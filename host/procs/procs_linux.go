@@ -1,6 +1,6 @@
 // procs_linux.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-29
+// Created: 2026-10-25 · Last updated: 2026-10-30
 //
 // Purpose: this user's processes and the program each runs, on Linux (procs_darwin.go says what
 // for): /proc/<pid>/exe and the owners of /proc's folders.
@@ -9,7 +9,7 @@
 // - Moved here from core/internal/bus (executable_linux.go, 2026-10-25) on 2026-10-26.
 // - A program removed while it runs reads as its path with " (deleted)" after it.
 // - Moved here from core/internal/procs on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package procs
 

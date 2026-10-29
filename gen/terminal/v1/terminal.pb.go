@@ -3,15 +3,16 @@
 // Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: the terminal engine's messages: opening a terminal, what happens in it (events), the
-// frames its views draw, and the input they send back (Docs/DESIGN.md §3.1, §3.2). They are the
-// engine's own; whoever uses the engine (sdTerm's app layer) wraps them in messages of its own.
+// frames its views draw, and the input they send back (Docs/design/01-DESIGN.md §3.1, §3.2). They
+// are the engine's own; whoever uses the engine (sdTerm's app layer) wraps them in messages of its
+// own.
 //
 // Notes:
 // - Taken from SiliconDesk's spec/proto/silicondesk/protocol/v1/terminal.proto on 2026-10-23, with
 //   its fields, numbers and meanings kept. Changed: its own package; no app instance ids (a
 //   terminal is named by terminal_id alone; their field numbers are reserved); TerminalColors
 //   moved in from SiliconDesk's common.proto; no path queries (files are the app layer's,
-//   FILES.md §1). Where SiliconDesk's comments say "session", read the engine; "app", the
+//   03-FILES.md §1). Where SiliconDesk's comments say "session", read the engine; "app", the
 //   engine's user; "client", the views. Section numbers name SiliconDesk's PROTOCOL.md.
 // - The session is the only terminal emulator. The client never parses terminal output: it
 //   receives the emulated screen as frames (changed rows, scrolled-off lines, cursor, modes) and

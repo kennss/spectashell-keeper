@@ -2,11 +2,11 @@
 // Author: Kennt Kim
 // Created: 2026-10-27 · Last updated: 2026-10-30
 //
-// Purpose: a console as a program a keeper runs (Docs/CONNECTIONS.md §6): spectashell-keeper's
-// serial and telnet commands put a serial port or a telnet session where a shell would be, and this
-// copies between it and the keeper's terminal — so a board's console stays open with the app
-// closed, its output is replayed to whoever opens it, and another device can open or watch it, as
-// any kept shell.
+// Purpose: a console as a program a keeper runs (Docs/design/02-CONNECTIONS.md §6):
+// spectashell-keeper's serial and telnet commands put a serial port or a telnet session where a
+// shell would be, and this copies between it and the keeper's terminal — so a board's console stays
+// open with the app closed, its output is replayed to whoever opens it, and another device can open
+// or watch it, as any kept shell.
 //
 // Notes:
 //   - The keeper's terminal is put in raw mode by the command, so Control-C, a carriage return and
@@ -21,7 +21,7 @@
 //   - The console ending — the adapter unplugged, the server closing the session — says so in the
 //     terminal and ends the program, with 1 for a failure and 0 for a session the server closed.
 // - Moved here from core/internal/console on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 package console
 

@@ -2,10 +2,10 @@
 // Author: Kennt Kim
 // Created: 2026-10-25 · Last updated: 2026-10-30
 //
-// Purpose: a device's socket for page commands (Docs/WINDOWS.md §3), as the core on the Mac and
-// a relay on a host listen on it: made at its path, mode 0600, in place of whatever was left
-// there; made again when it was removed, as a keeper makes its own again (Docs/KEEPER.md §4); and
-// removed when it closes, unless another took its path meanwhile.
+// Purpose: a device's socket for page commands (Docs/design/05-WINDOWS.md §3), as the core on the
+// Mac and a relay on a host listen on it: made at its path, mode 0600, in place of whatever was
+// left there; made again when it was removed, as a keeper makes its own again (Docs/KEEPER.md §4);
+// and removed when it closes, unless another took its path meanwhile.
 //
 // Notes:
 // - Newest wins: a device with two connections to one machine (two addresses of it) runs two
@@ -16,7 +16,7 @@
 // - The listener replaced on a check is closed without unlinking the path (SetUnlinkOnClose), which
 //   another socket's may be by then.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
-//   (Docs/DESIGN.md §3.2).
+//   (Docs/design/01-DESIGN.md §3.2).
 
 //go:build unix
 

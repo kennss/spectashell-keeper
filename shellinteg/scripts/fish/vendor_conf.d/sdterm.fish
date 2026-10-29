@@ -12,7 +12,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/fish/vendor_conf.d/sdterm.fish on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/CONNECTIONS.md §1).
+#   engine's user (Docs/design/02-CONNECTIONS.md §1).
 # - fish 4 prints OSC 133 itself; its marks are left alone.
 # - C carries the command line (`cmdline_url`); fish has no cheap clock, so not its start: a command
 #   that runs across a session change ends with no known duration.

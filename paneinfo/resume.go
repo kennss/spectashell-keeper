@@ -4,7 +4,7 @@
 //
 // Purpose: the shell command that resumes the conversation of the coding agent running in front of
 // a terminal — Claude Code or Codex — so that after a restart of the machine, which no shell
-// survives, the app can type it at the reopened shell's prompt (Docs/CONNECTIONS.md §3,
+// survives, the app can type it at the reopened shell's prompt (Docs/design/02-CONNECTIONS.md §3,
 // SiliconDesk's Docs/apps/sdterm.md §2.3).
 //
 // Notes:

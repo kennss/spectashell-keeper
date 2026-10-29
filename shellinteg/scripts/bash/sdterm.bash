@@ -10,7 +10,7 @@
 # Notes:
 # - Taken from SiliconDesk's host/internal/shellinteg/scripts/bash/sdterm.bash on
 #   2026-10-23. Where these notes say "the session", read whoever starts the shell: the
-#   engine's user (Docs/CONNECTIONS.md §1).
+#   engine's user (Docs/design/02-CONNECTIONS.md §1).
 # - The session starts the login shell as `-bash --posix` with ENV naming this file and
 #   SDTERM_BASH_INJECT set: in POSIX mode an interactive bash reads only $ENV, so this file runs
 #   first. Sourced from a ~/.bashrc (another host's) it only sets the marks. It ends POSIX mode and reads the
