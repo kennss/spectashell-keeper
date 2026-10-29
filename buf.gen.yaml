@@ -1,0 +1,22 @@
+# buf.gen.yaml
+# Author: Kennt Kim
+# Created: 2026-10-23 · Last updated: 2026-10-29
+#
+# Purpose: generates the engine's Go message code from proto/ into gen/. Run `go generate ./gen`.
+#
+# Notes:
+# - protoc-gen-go is pinned by go.mod's `tool` directive, so the generator and the
+#   google.golang.org/protobuf runtime are always the same version (SiliconDesk's arrangement).
+# - The output is committed, so a plain `go build` needs no buf.
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/kennss/spectashell-keeper/gen
+plugins:
+  - local: ["go", "tool", "protoc-gen-go"]
+    out: gen
+    opt: paths=source_relative
+inputs:
+  - directory: proto

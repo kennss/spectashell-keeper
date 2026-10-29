@@ -1,0 +1,10 @@
+# .gitignore
+# Author: Kennt Kim
+# Created: 2026-10-29 · Last updated: 2026-10-29
+#
+# Purpose: files git should never track — build products and machine-specific files. The generated
+# message code (gen/) is committed; the programs built from it are not.
+
+.DS_Store
+/sdterm-keeper
+/out/

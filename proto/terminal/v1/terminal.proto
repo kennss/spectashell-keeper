@@ -1,0 +1,626 @@
+// terminal.proto
+// Author: Kennt Kim
+// Created: 2026-10-14 · Last updated: 2026-10-29
+//
+// Purpose: the terminal engine's messages: opening a terminal, what happens in it (events), the
+// frames its views draw, and the input they send back (Docs/DESIGN.md §3.1, §3.2). They are the
+// engine's own; whoever uses the engine (sdTerm's app layer) wraps them in messages of its own.
+//
+// Notes:
+// - Taken from SiliconDesk's spec/proto/silicondesk/protocol/v1/terminal.proto on 2026-10-23, with
+//   its fields, numbers and meanings kept. Changed: its own package; no app instance ids (a
+//   terminal is named by terminal_id alone; their field numbers are reserved); TerminalColors
+//   moved in from SiliconDesk's common.proto; no path queries (files are the app layer's,
+//   DESIGN.md §5.5). Where SiliconDesk's comments say "session", read the engine; "app", the
+//   engine's user; "client", the views. Section numbers name SiliconDesk's PROTOCOL.md.
+// - The session is the only terminal emulator. The client never parses terminal output: it
+//   receives the emulated screen as frames (changed rows, scrolled-off lines, cursor, modes) and
+//   sends input as text, keys, pastes and mouse actions, which the session encodes for the
+//   program according to the modes it set. Reattaching therefore shows exactly the host's screen.
+// - A terminal is named by terminal_id, chosen by the engine's user: non-zero, never reused while
+//   the engine runs.
+// - Sizes are in character cells.
+
+syntax = "proto3";
+
+package terminal.v1;
+
+// ---------------------------------------------------------------------------------------------
+// App stream
+// ---------------------------------------------------------------------------------------------
+
+// Start a program on a new pseudo-terminal (app -> session).
+message TerminalOpen {
+  // App-local, non-zero, never reused during the life of the app instance.
+  uint64 terminal_id = 1;
+  // Program and arguments. Empty runs the user's login shell as a login shell.
+  repeated string argv = 2;
+  // Working directory; empty is the user's home directory.
+  string working_directory = 3;
+  // Added to the session's environment (after TERM, COLORTERM and LANG are set, so these win).
+  map<string, string> environment = 4;
+  // Initial size until the client reports the size it draws; 0 means 80 x 24.
+  uint32 columns = 5;
+  uint32 rows = 6;
+  // Keep the program running when the session ends (a new build replaces it, it is stopped or it
+  // fails); the next session gives it back to this app (AppWelcome.kept_terminals, §7.6).
+  bool persist = 7;
+  // Instead of starting a program: take back a kept terminal (KeptTerminal.keeper_id). argv,
+  // working_directory, environment and persist are ignored; the screen is rebuilt from the
+  // program's recent output.
+  string adopt = 8;
+  // With persist (or adopt): kept with the terminal and handed back in KeptTerminal, so the app
+  // can reopen the terminal's window as the same window (WindowSpec.restoration_id, PROTOCOL.md
+  // §8.3). Adopting with a different one replaces it.
+  string restoration_id = 9;
+  // With an empty argv: start the login shell with the session's shell integration (bash, zsh and
+  // fish mark their prompts and commands with OSC 133; PROTOCOL.md §7.7). Other shells, and a
+  // program named in argv, start as they would without it.
+  bool shell_integration = 10;
+  // Patterns looked for in the program's output from the start, replayed output included
+  // (TerminalTriggers; PROTOCOL.md §7.10).
+  repeated TerminalTrigger triggers = 11;
+  // With adopt: join the kept terminal to watch, without taking it over from whoever holds it
+  // (Docs/KEEPER.md §2.1); TerminalTake takes the keyboard later. A keeper from a build before
+  // joining cannot be joined, and the open fails without taking it over.
+  bool join = 12;
+  // With persist: the app's own name for where it opened the terminal from (sdTerm: the saved host
+  // it reached the keeper through), kept with it as given (Docs/KEEPER.md §3, `origin`) and handed
+  // back in KeptTerminal.origin. Ignored when adopting: whoever attaches later never changes it.
+  string origin = 13;
+}
+
+// A pattern the session looks for in each line a program finishes on the main screen
+// (PROTOCOL.md §7.10): sdterm's triggers ("CUDA out of memory", a Python traceback).
+message TerminalTrigger {
+  // The app's name for it, given back in TerminalTriggered.
+  string id = 1;
+  // RE2 syntax (Go's regexp), matched against the line's text.
+  string pattern = 2;
+  // The text it matches is drawn highlighted (TERMINAL_STYLE_FLAG_HIGHLIGHT).
+  bool highlight = 3;
+  // The app hears of each line it matches (TerminalEvent.triggered).
+  bool notify = 4;
+}
+
+// Replace a terminal's triggers (app -> session); empty: none. A pattern RE2 cannot read is an
+// Error (PROTOCOL_VIOLATION) naming it, and the terminal keeps the triggers it had.
+message TerminalTriggers {
+  uint64 terminal_id = 1;
+  repeated TerminalTrigger triggers = 2;
+}
+
+// A line matched a trigger that notifies (session -> app, TerminalEvent.triggered).
+message TerminalTriggered {
+  // TerminalTrigger.id.
+  string id = 1;
+  // The line's text (a line the terminal wrapped, whole), trailing blanks trimmed.
+  string line = 2;
+}
+
+// A persistent terminal of this app that outlived the previous session (session -> app, in
+// AppWelcome), waiting to be adopted with TerminalOpen.adopt.
+message KeptTerminal {
+  string keeper_id = 1;
+  string title = 2;
+  string working_directory = 3;
+  // The program has ended meanwhile; adopting shows its last screen and its exit.
+  bool exited = 4;
+  // TerminalOpen.restoration_id of the terminal (empty when it had none).
+  string restoration_id = 5;
+  // The program in front of the terminal when it was listed, as its command line ("btop"); the
+  // shell's name at its prompt. Empty when it ended, could not be read, or the lister does not
+  // read it (an older keeper program on a host).
+  string program = 6;
+  // When its program started (Unix seconds).
+  int64 started = 7;
+  // The device that attached last (its name, Meta.client), and whether a client is attached now;
+  // empty and false from a keeper before 2026-10-23.
+  string held_by = 8;
+  bool attached = 9;
+  // How the program ended, once exited: its code (-1 for a signal) and the signal's name.
+  int32 exit_code = 10;
+  string exit_signal = 11;
+  // The last lines of its screen, as its keeper draws them (KEEPER.md §4, `preview`); empty from a
+  // keeper before 2026-10-25.
+  repeated string preview = 12;
+  // Which device holds it (held_by names it), told apart from others of the same name; empty from
+  // a client before 2026-10-25.
+  string held_by_id = 13;
+  // Its program draws its whole screen (the alternate screen), so preview is a piece of that
+  // interface, and the title the program set (KEEPER.md §4, `full_screen`, `screen_title`); false
+  // and empty from a keeper before 2026-10-25.
+  bool full_screen = 14;
+  string screen_title = 15;
+  // The clients watching it (KEEPER.md §2.1); empty from a keeper before 2026-10-26.
+  repeated TerminalPeer watchers = 16;
+  // TerminalOpen.origin of the terminal; empty when it had none, or from a keeper before 2026-10-27.
+  string origin = 17;
+  // What its program says it is doing (KEEPER.md §4, `status`, `status_kind`): its most pressing
+  // OSC 7501 state ("blocked", "error", "working", "done", "idle") and, with blocked, why
+  // ("permission", "question", "auth"); empty while it says nothing, or from a keeper before
+  // 2026-10-29.
+  string status = 18;
+  string status_kind = 19;
+}
+
+// A client of a kept terminal, as it named itself to the keeper (KEEPER.md §2.1).
+message TerminalPeer {
+  // The device's name ("Sam's MacBook Pro") and its own id; empty when it named none.
+  string client = 1;
+  string client_id = 2;
+}
+
+// Take the keyboard of a terminal that watches (app -> session; KEEPER.md §2.1): the program gets
+// this terminal's input and size from now on, and the one that held it watches. TerminalPresent
+// follows. Ignored for a terminal that holds it already, or whose link cannot share it.
+message TerminalTake {
+  uint64 terminal_id = 1;
+}
+
+// Who holds a shared terminal's keyboard and who watches it (session -> app; KEEPER.md §2.1), sent
+// when the terminal is attached and whenever that changes, by a keeper that can share its program.
+message TerminalPresent {
+  // This terminal holds the keyboard. While it does not, it watches: its frames have the program's
+  // size, not the views', and its input goes nowhere.
+  bool holding = 1;
+  // The client that holds it; absent when none does.
+  TerminalPeer holder = 2;
+  // The clients that watch, this one among them while it does.
+  repeated TerminalPeer watchers = 3;
+}
+
+// Write bytes to the program's input as if typed (app -> session), e.g. a "Run" button.
+message TerminalWrite {
+  uint64 terminal_id = 1;
+  bytes data = 2;
+  // Write it as a paste: bracketed when the program asked for bracketed paste (PROTOCOL.md §7.5),
+  // so a multi-line text reaches it as one paste, not as lines typed and run (sdterm's snippets).
+  // `data` must then be UTF-8.
+  bool paste = 3;
+}
+
+// Hang up the terminal and forget it (app -> session). The program gets SIGHUP; its screen is
+// dropped. A terminal whose program exited stays readable until the app closes it.
+message TerminalClose {
+  uint64 terminal_id = 1;
+}
+
+message TerminalExited {
+  // The exit status, or -1 when the program was ended by a signal.
+  int32 exit_code = 1;
+  // Signal name such as "SIGHUP" when ended by a signal, else empty.
+  string signal = 2;
+}
+
+// Something the app may want to show about a terminal (session -> app).
+message TerminalEvent {
+  uint64 terminal_id = 1;
+  oneof kind {
+    // The program set the title (OSC 0/2).
+    string title = 2;
+    // The program reported its working directory (OSC 7), as an absolute host path.
+    string working_directory = 3;
+    // The program exited. The terminal keeps its last screen until TerminalClose.
+    TerminalExited exited = 4;
+    // The open failed (bad program, no pseudo-terminals left); the terminal does not exist.
+    string open_failed = 5;
+    // The program asked to notify the user (OSC 9, 777, 99; PROTOCOL.md §7.2). Never sent for output
+    // replayed after a session change.
+    TerminalNotification notification = 6;
+    // The program's status changed (OSC 7501 records, OSC 9;4 progress; PROTOCOL.md §7.2).
+    TerminalStatus status = 7;
+    // A command the shell ran ended (OSC 133 D after C; PROTOCOL.md §7.7). Never sent for output
+    // replayed after a session change.
+    TerminalCommandFinished command_finished = 8;
+    // What runs in the terminal, where, and the ports it opened (PROTOCOL.md §7.8): sent while a
+    // client is attached, when it changes.
+    TerminalInfo info = 9;
+    // A line matched a trigger that notifies (PROTOCOL.md §7.10). Never sent for output replayed
+    // after a session change.
+    TerminalTriggered triggered = 10;
+    // The program rang the bell (BEL; PROTOCOL.md §7.2): one event for each piece of output that
+    // held one or more. Never sent for output replayed after a session change.
+    TerminalBell bell = 11;
+    // Who holds the keyboard of a shared terminal and who watches it (TerminalPresent).
+    TerminalPresent present = 12;
+  }
+}
+
+// A bell the program rang. It carries nothing: the client sounds or flashes it from the frames
+// (TerminalFrame.bells); the app hears of it to mark a pane the user is not looking at.
+message TerminalBell {}
+
+// What runs in a terminal, read by the session from the host (PROTOCOL.md §7.8).
+message TerminalInfo {
+  // The program in front — the leader of the terminal's foreground process group — as its
+  // command line: "claude", "python train.py", "ssh nas"; the shell's name at its prompt.
+  string program = 1;
+  // Its working directory: the one the shell reported (OSC 7), else the program's own.
+  string directory = 2;
+  // The git branch of that directory ("main"; a detached head's short hash); empty: none.
+  string branch = 3;
+  // TCP ports that processes started from the terminal listen on, lowest first.
+  repeated TerminalPort ports = 4;
+  // The program in front is `ssh` to this host (its destination, without a user): the terminal is
+  // on another machine. Empty: this one.
+  string remote = 5;
+  // (1.3) The process id of the program in front (the shell's at its prompt), on the host: an app
+  // that owns the terminal reads what that program keeps about itself (sdterm: a coding agent's
+  // session, to offer it again after a restart). 0: not known, or a peer before 1.3.
+  uint32 program_pid = 6;
+  // (sdTerm) The command that resumes the coding agent in front (Claude Code, Codex) after a
+  // restart, shell-quoted, to be typed at a new shell's prompt; empty for none.
+  string resume = 7;
+}
+
+message TerminalPort {
+  uint32 port = 1;
+  // Bound to every address (other machines reach it too); else loopback only.
+  bool everywhere = 2;
+  // The program holding it ("python3").
+  string process = 3;
+}
+
+// A command that ended, as shell integration reported it.
+message TerminalCommandFinished {
+  // The command line: as the shell reported it, else as it was typed on the screen.
+  string command = 1;
+  // Absent when the shell did not say.
+  optional int32 exit_code = 2;
+  // How long it ran. Absent when not known: it began before a session change, and the shell did
+  // not say when.
+  optional uint64 duration_ms = 3;
+}
+
+// A notification a program asked for: plain text, as the program wrote it (never markup).
+message TerminalNotification {
+  string title = 1;
+  string body = 2;
+}
+
+// What a program says it is doing (Program Status Protocol, OSC 7501), as the terminal's most pressing
+// record — blocked, then error, then working, then done, then idle — and its progress.
+message TerminalStatus {
+  // "blocked", "error", "working", "done", "idle"; empty: no record.
+  string state = 1;
+  // With "blocked": "permission", "question" or "auth" (as the program reported it).
+  string kind = 2;
+  // The program's name for itself ("claude-code"), as reported: text, not a trusted label.
+  string app = 3;
+  // The record's title and message, decoded; empty when it gave none.
+  string title = 4;
+  string message = 5;
+  // 0-100 (the record's, else OSC 9;4's); absent: none.
+  optional uint32 progress = 6;
+  // OSC 9;4 says it is busy with no measure (state 3).
+  bool indeterminate = 7;
+  // The status as found when a terminal was taken back after a session change, not a change the
+  // program just made: show it, but do not notify for it.
+  bool restored = 8;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Client stream: session -> client
+// ---------------------------------------------------------------------------------------------
+
+message TerminalColor {
+  oneof kind {
+    // 0-255: the 16 theme colors, then the xterm 6x6x6 cube and grey ramp.
+    uint32 index = 1;
+    // 0xRRGGBB.
+    uint32 rgb = 2;
+  }
+}
+
+enum TerminalUnderline {
+  TERMINAL_UNDERLINE_UNSPECIFIED = 0; // no underline
+  TERMINAL_UNDERLINE_SINGLE = 1;
+  TERMINAL_UNDERLINE_DOUBLE = 2;
+  TERMINAL_UNDERLINE_CURLY = 3;
+  TERMINAL_UNDERLINE_DOTTED = 4;
+  TERMINAL_UNDERLINE_DASHED = 5;
+}
+
+// Bits of TerminalStyle.flags.
+enum TerminalStyleFlag {
+  TERMINAL_STYLE_FLAG_UNSPECIFIED = 0;
+  TERMINAL_STYLE_FLAG_BOLD = 1;
+  TERMINAL_STYLE_FLAG_FAINT = 2;
+  TERMINAL_STYLE_FLAG_ITALIC = 4;
+  TERMINAL_STYLE_FLAG_BLINK = 8;
+  TERMINAL_STYLE_FLAG_INVERSE = 16;
+  TERMINAL_STYLE_FLAG_INVISIBLE = 32;
+  TERMINAL_STYLE_FLAG_STRIKETHROUGH = 64;
+  TERMINAL_STYLE_FLAG_OVERLINE = 128;
+  // Text a trigger matched (TerminalTrigger.highlight): drawn in the device's highlight colours.
+  // Never set by a program.
+  TERMINAL_STYLE_FLAG_HIGHLIGHT = 256;
+}
+
+// How a run of cells looks. Absent colors are the theme's default foreground / background.
+message TerminalStyle {
+  TerminalColor foreground = 1;
+  TerminalColor background = 2;
+  TerminalColor underline_color = 3;
+  // TerminalStyleFlag bits.
+  uint32 flags = 4;
+  TerminalUnderline underline = 5;
+  // OSC 8 hyperlink target, if any.
+  string link = 6;
+}
+
+// Consecutive cells of one style.
+message TerminalRun {
+  // 0 = the default style; n = TerminalFrame.styles[n - 1].
+  uint32 style = 1;
+  // Without `cluster`: one cell per Unicode scalar. With `cluster`: exactly one cell whose
+  // content is all of `text` (a character followed by combining marks, joiners or selectors).
+  string text = 2;
+  // Every cell of the run is two columns wide (East Asian wide characters, emoji).
+  bool wide = 3;
+  bool cluster = 4;
+}
+
+message TerminalLine {
+  // Cells from the first column. Trailing blank cells of the default style are left out.
+  repeated TerminalRun runs = 1;
+  // The line continues on the next one (the program wrote past the last column): copying
+  // text joins the two without a line break.
+  bool wrapped = 2;
+  // What shell integration says begins or ends on this line (PROTOCOL.md §7.7); absent: nothing.
+  TerminalMark mark = 3;
+}
+
+// Where shell integration (OSC 133) put a prompt, a command's output and a command's end. One
+// line may hold several: a command with no output begins and ends on the line of the next
+// prompt. Lines of the alternate screen hold none.
+message TerminalMark {
+  // A prompt starts on this line.
+  bool prompt = 1;
+  // A command's output starts on this line, at output_column.
+  bool output = 2;
+  uint32 output_column = 3;
+  // With output: the command line (TerminalCommandFinished.command).
+  string command = 4;
+  // A command ended on this line; its output ends before end.column.
+  TerminalCommandEnd end = 5;
+  // With prompt: the directory the shell last reported (OSC 7) as the prompt began — where the
+  // command typed after it runs, for paths in its output (TerminalPathQuery). Empty: not known, a
+  // directory on another host (a shell reached by ssh), or a command found running on another host.
+  string directory = 6;
+}
+
+message TerminalCommandEnd {
+  uint32 column = 1;
+  // Absent when the shell did not say.
+  optional int32 exit_code = 2;
+  // Absent when not known (TerminalCommandFinished.duration_ms).
+  optional uint64 duration_ms = 3;
+}
+
+message TerminalRow {
+  // 0 = the top row of the screen.
+  uint32 index = 1;
+  TerminalLine line = 2;
+}
+
+enum TerminalCursorShape {
+  TERMINAL_CURSOR_SHAPE_UNSPECIFIED = 0; // same as BLOCK
+  TERMINAL_CURSOR_SHAPE_BLOCK = 1;
+  TERMINAL_CURSOR_SHAPE_UNDERLINE = 2;
+  TERMINAL_CURSOR_SHAPE_BAR = 3;
+}
+
+message TerminalCursor {
+  // May equal the column count right after the last column was written; draw it on the last
+  // column.
+  uint32 column = 1;
+  uint32 row = 2;
+  bool hidden = 3;
+  TerminalCursorShape shape = 4;
+  bool blink = 5;
+}
+
+enum TerminalMouseTracking {
+  // Not tracked: mouse actions select text and scroll the history.
+  TERMINAL_MOUSE_TRACKING_UNSPECIFIED = 0;
+  // The program wants presses (X10 mode 9).
+  TERMINAL_MOUSE_TRACKING_PRESS = 1;
+  // Presses and releases (1000).
+  TERMINAL_MOUSE_TRACKING_PRESS_RELEASE = 2;
+  // Also motion while a button is down (1002).
+  TERMINAL_MOUSE_TRACKING_DRAG = 3;
+  // Also motion with no button down (1003).
+  TERMINAL_MOUSE_TRACKING_MOTION = 4;
+}
+
+// Modes the client needs to decide what an action means. Everything else (cursor-key mode,
+// bracketed paste, mouse encoding, focus reporting) is applied by the session when it encodes
+// input.
+message TerminalModes {
+  TerminalMouseTracking mouse = 1;
+  // A full-screen program (vim, less, htop) is on the alternate screen: there is no history to
+  // scroll, so the scroll wheel goes to the program (as mouse wheel or arrow keys).
+  bool alternate_screen = 2;
+}
+
+// A change to a terminal, applied by the client in the field order defined in PROTOCOL.md §7.3.
+message TerminalFrame {
+  reserved 1;
+  reserved "instance_id";
+  uint64 terminal_id = 2;
+  // 1, 2, 3, ... per terminal and client stream. Acknowledged with TerminalAck.
+  uint64 seq = 3;
+  // Drop the copy of this terminal (screen and history) before applying the frame.
+  bool start_over = 4;
+  // The screen size; always set. A change means every row follows in `changed_rows`.
+  uint32 columns = 5;
+  uint32 rows = 6;
+  // The program cleared the history (CSI 3 J).
+  bool history_cleared = 7;
+  // How many lines the screen scrolled up since the previous frame.
+  uint64 scrolled = 8;
+  // The lines that scrolled off the top, oldest first: the last `scrolled` lines, or fewer when
+  // that exceeds `history_limit`.
+  repeated TerminalLine history_append = 9;
+  // Older history for a client catching up, oldest first: goes above every history line the
+  // client has.
+  repeated TerminalLine history_prepend = 10;
+  // Rows that differ from the client's copy after scrolling.
+  repeated TerminalRow changed_rows = 11;
+  // Styles used by the runs of this frame (TerminalRun.style).
+  repeated TerminalStyle styles = 12;
+  TerminalCursor cursor = 13;
+  TerminalModes modes = 14;
+  // Bells rung since the previous frame.
+  uint32 bells = 15;
+  // The most history lines the client should keep; set in start_over frames.
+  uint32 history_limit = 16;
+}
+
+// The terminal no longer exists (the app closed it, or its instance ended). The client drops its
+// copy; a Terminal widget still naming it shows that no terminal is attached.
+message TerminalClosed {
+  reserved 1;
+  reserved "instance_id";
+  uint64 terminal_id = 2;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Client stream: client -> session
+// ---------------------------------------------------------------------------------------------
+
+enum TerminalKeyCode {
+  TERMINAL_KEY_CODE_UNSPECIFIED = 0;
+  // A character key; TerminalKey.text holds the character the key produces without Control
+  // or Option, e.g. "c" for Control-C.
+  TERMINAL_KEY_CODE_CHARACTER = 1;
+  TERMINAL_KEY_CODE_ENTER = 2;
+  TERMINAL_KEY_CODE_TAB = 3;
+  TERMINAL_KEY_CODE_BACKSPACE = 4;
+  TERMINAL_KEY_CODE_ESCAPE = 5;
+  TERMINAL_KEY_CODE_UP = 6;
+  TERMINAL_KEY_CODE_DOWN = 7;
+  TERMINAL_KEY_CODE_LEFT = 8;
+  TERMINAL_KEY_CODE_RIGHT = 9;
+  TERMINAL_KEY_CODE_HOME = 10;
+  TERMINAL_KEY_CODE_END = 11;
+  TERMINAL_KEY_CODE_PAGE_UP = 12;
+  TERMINAL_KEY_CODE_PAGE_DOWN = 13;
+  TERMINAL_KEY_CODE_INSERT = 14;
+  TERMINAL_KEY_CODE_DELETE = 15;
+  // F1 = 101 ... F20 = 120.
+  TERMINAL_KEY_CODE_F1 = 101;
+  TERMINAL_KEY_CODE_F2 = 102;
+  TERMINAL_KEY_CODE_F3 = 103;
+  TERMINAL_KEY_CODE_F4 = 104;
+  TERMINAL_KEY_CODE_F5 = 105;
+  TERMINAL_KEY_CODE_F6 = 106;
+  TERMINAL_KEY_CODE_F7 = 107;
+  TERMINAL_KEY_CODE_F8 = 108;
+  TERMINAL_KEY_CODE_F9 = 109;
+  TERMINAL_KEY_CODE_F10 = 110;
+  TERMINAL_KEY_CODE_F11 = 111;
+  TERMINAL_KEY_CODE_F12 = 112;
+  TERMINAL_KEY_CODE_F13 = 113;
+  TERMINAL_KEY_CODE_F14 = 114;
+  TERMINAL_KEY_CODE_F15 = 115;
+  TERMINAL_KEY_CODE_F16 = 116;
+  TERMINAL_KEY_CODE_F17 = 117;
+  TERMINAL_KEY_CODE_F18 = 118;
+  TERMINAL_KEY_CODE_F19 = 119;
+  TERMINAL_KEY_CODE_F20 = 120;
+}
+
+// Bits of TerminalKey.modifiers and TerminalMouse.modifiers.
+enum TerminalModifier {
+  TERMINAL_MODIFIER_UNSPECIFIED = 0;
+  TERMINAL_MODIFIER_SHIFT = 1;
+  // Option on Apple keyboards, when the user set it to act as Meta/Alt.
+  TERMINAL_MODIFIER_ALT = 2;
+  TERMINAL_MODIFIER_CONTROL = 4;
+}
+
+// A key the client does not turn into text itself: special keys, and character keys pressed
+// with Control or with Option acting as Alt.
+message TerminalKey {
+  TerminalKeyCode code = 1;
+  uint32 modifiers = 2;
+  string text = 3;
+}
+
+enum TerminalMouseAction {
+  TERMINAL_MOUSE_ACTION_UNSPECIFIED = 0;
+  TERMINAL_MOUSE_ACTION_PRESS = 1;
+  TERMINAL_MOUSE_ACTION_RELEASE = 2;
+  // Motion; `button` is the button held, or UNSPECIFIED.
+  TERMINAL_MOUSE_ACTION_MOVE = 3;
+  TERMINAL_MOUSE_ACTION_WHEEL_UP = 4;
+  TERMINAL_MOUSE_ACTION_WHEEL_DOWN = 5;
+  TERMINAL_MOUSE_ACTION_WHEEL_LEFT = 6;
+  TERMINAL_MOUSE_ACTION_WHEEL_RIGHT = 7;
+}
+
+enum TerminalMouseButton {
+  // No button (motion without a button held).
+  TERMINAL_MOUSE_BUTTON_UNSPECIFIED = 0;
+  TERMINAL_MOUSE_BUTTON_LEFT = 1;
+  TERMINAL_MOUSE_BUTTON_MIDDLE = 2;
+  TERMINAL_MOUSE_BUTTON_RIGHT = 3;
+}
+
+// A mouse action on the screen, sent only when the program tracks the mouse
+// (TerminalModes.mouse) or, for the wheel, when it is on the alternate screen.
+message TerminalMouse {
+  TerminalMouseAction action = 1;
+  TerminalMouseButton button = 2;
+  // Cell under the pointer, 0-based.
+  uint32 column = 3;
+  uint32 row = 4;
+  uint32 modifiers = 5;
+}
+
+// User input for a terminal (client -> session).
+message TerminalInput {
+  reserved 1;
+  reserved "instance_id";
+  uint64 terminal_id = 2;
+  oneof kind {
+    // Committed text: typed characters, including the result of an input method.
+    string text = 3;
+    TerminalKey key = 4;
+    // Pasted text; the session brackets it when the program asked for bracketed paste.
+    string paste = 5;
+    TerminalMouse mouse = 6;
+    // The terminal gained (true) or lost (false) keyboard focus.
+    bool focus = 7;
+  }
+}
+
+// The size the client draws the terminal at (client -> session).
+message TerminalResize {
+  reserved 1;
+  reserved "instance_id";
+  uint64 terminal_id = 2;
+  uint32 columns = 3;
+  uint32 rows = 4;
+}
+
+// The client applied every frame up to `seq` (client -> session). Paces frames (§7.4).
+message TerminalAck {
+  reserved 1;
+  reserved "instance_id";
+  uint64 terminal_id = 2;
+  uint64 seq = 3;
+}
+
+// The colours the views draw with, so the engine answers a program's colour queries (OSC 4 for
+// 0-15, OSC 10, 11, 12) with what is on the screen (PROTOCOL.md §7.2).
+message TerminalColors {
+  uint32 foreground = 1;
+  uint32 background = 2;
+  uint32 cursor = 3;
+  // The 16 theme colours (0-15); colours 16-255 are xterm's cube and grey ramp everywhere.
+  repeated uint32 palette = 4;
+}

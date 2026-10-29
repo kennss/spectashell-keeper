@@ -1,0 +1,14 @@
+# buf.yaml
+# Author: Kennt Kim
+# Created: 2026-10-23 · Last updated: 2026-10-23
+#
+# Purpose: the terminal engine's protobuf module (proto/), for `buf lint` and `buf generate`.
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE
