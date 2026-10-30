@@ -394,6 +394,14 @@ func (t *Terminal) Take() {
 	}
 }
 
+// SetFront tells the keeper this device is in front, looking, for d — or with 0 that it went away
+// (KEEPER.md §2.2) — holding the keyboard or watching. A link without a keeper ignores it.
+func (t *Terminal) SetFront(d time.Duration) {
+	if j, ok := t.link.(Joinable); ok {
+		_ = j.Front(d)
+	}
+}
+
 func (t *Terminal) writeLoop() {
 	for {
 		t.inMu.Lock()

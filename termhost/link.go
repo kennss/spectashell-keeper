@@ -20,7 +20,11 @@
 
 package termhost
 
-import "github.com/kennss/spectashell-keeper/keeper"
+import (
+	"time"
+
+	"github.com/kennss/spectashell-keeper/keeper"
+)
 
 // Link carries one program's bytes.
 type Link interface {
@@ -45,6 +49,9 @@ type Joinable interface {
 	SayWho(keeper.Who) error
 	// Take takes the keyboard for this client, when it watches (keeper.Conn.Take).
 	Take() error
+	// Front says this client's device is in front for d, or with 0 that it went away
+	// (keeper.Conn.Front; KEEPER.md §2.2).
+	Front(d time.Duration) error
 }
 
 // LinkInfo is what a link knows of its program when it is attached.
