@@ -172,6 +172,10 @@ type keeper struct {
 	idle       *time.Timer
 	infoNow    chan struct{} // asks watchInfo to read at once (a client connected)
 	events     *eventLog     // what happened to it, for an end that leaves no End (events.go)
+	// observer hears what the keeper notices for a user who is away (observe.go); nil when the
+	// keeper program gave none. noticed is the status it was last told of.
+	observer Observer
+	noticed  term.Status
 }
 
 // endpoint is a socket the keeper listens on.
@@ -183,7 +187,10 @@ type endpoint struct {
 }
 
 // Main runs a keeper process and returns its exit status.
-func Main() int {
+func Main() int { return run(nil) }
+
+// run runs a keeper; observe, when given, makes the observer of what it notices (observe.go).
+func run(observe func(View) Observer) int {
 	var cfg Config
 	if err := json.NewDecoder(os.Stdin).Decode(&cfg); err != nil {
 		fmt.Println("error: bad configuration:", err)
@@ -193,6 +200,11 @@ func Main() int {
 	if err != nil {
 		fmt.Println("error:", err)
 		return 1
+	}
+	if observe != nil {
+		k.out.Lock()
+		k.observer = observe(view{k})
+		k.out.Unlock()
 	}
 	k.events.note("started: keeper %d, program %d (%s), build %q", os.Getpid(), k.cmd.Process.Pid, cfg.Path, cfg.Build)
 	go k.endOnSignals()
@@ -247,11 +259,13 @@ func start(cfg Config) (*keeper, error) {
 		closeAll()
 		return nil, fmt.Errorf("start %s: %w", cfg.Path, err)
 	}
-	return &keeper{cfg: cfg, started: time.Now(), ptmx: ptmx, cmd: cmd, endpoints: endpoints,
+	k := &keeper{cfg: cfg, started: time.Now(), ptmx: ptmx, cmd: cmd, endpoints: endpoints,
 		cols: cfg.Columns, rows: cfg.Rows, meta: cfg.Meta, modes: newModes(cfg.Columns, cfg.Rows),
-		screen:  newModes(cfg.Columns, cfg.Rows),
 		sizes:   []sizeMark{{cols: cfg.Columns, rows: cfg.Rows}},
-		infoNow: make(chan struct{}, 1), events: &eventLog{path: EventsPath(cfg.Socket)}}, nil
+		infoNow: make(chan struct{}, 1), events: &eventLog{path: EventsPath(cfg.Socket)}}
+	// The screen reads the output as it comes: it has the keeper's clock, and tells an observer.
+	k.screen = term.New(k.screenOptions(cfg.Columns, cfg.Rows))
+	return k, nil
 }
 
 // listen listens on a Unix socket at path that only the user may use.
@@ -448,9 +462,11 @@ func (k *keeper) readProgram(done chan<- struct{}) {
 // terminal's size, so a command line typed on the screen reads as it was typed (shell
 // integration's running command, which ModeSequences carries too). It has no clock: the output it
 // reads was written earlier, so a command's start is known only when the shell gave it.
-func newModes(cols, rows int) *term.Terminal {
+func newModes(cols, rows int) *term.Terminal { return term.New(modesOptions(cols, rows)) }
+
+func modesOptions(cols, rows int) term.Options {
 	host, _ := os.Hostname()
-	return term.New(term.Options{Columns: cols, Rows: rows, HistoryLimit: -1, Hostname: host})
+	return term.Options{Columns: cols, Rows: rows, HistoryLimit: -1, Hostname: host}
 }
 
 func (k *keeper) keep(b []byte) {
@@ -723,6 +739,8 @@ func (k *keeper) session(conn net.Conn, join bool) {
 			k.out.Lock()
 			k.take(p)
 			k.out.Unlock()
+		case frameFront:
+			k.lease(p, payload)
 		}
 	}
 }
@@ -965,7 +983,7 @@ func (k *keeper) describe() {
 	d := Description{Version: Version, KeeperID: k.cfg.KeeperID, KeeperPID: os.Getpid(), PID: k.cmd.Process.Pid,
 		Started: k.started.Unix(), Meta: k.meta, Exited: k.exit != nil, Build: k.cfg.Build, Attached: k.holder != nil,
 		Exit: k.exit, Preview: k.preview, FullScreen: k.fullScreen, ScreenTitle: k.title, Watchers: k.watcherNames(),
-		Status: k.status.State, StatusKind: k.status.Kind}
+		Status: k.status.State, StatusKind: k.status.Kind, Push: k.observer != nil}
 	b, err := json.Marshal(d)
 	if err != nil {
 		return

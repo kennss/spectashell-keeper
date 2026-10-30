@@ -280,6 +280,13 @@ func (c *Conn) SayWho(who Who) error {
 // TakenOver if it cannot. A keeper from before skips it.
 func (c *Conn) Take() error { return c.send(frameTake, nil) }
 
+// Front says the device is in front, looking, for d (a lease, KEEPER.md §2.2), or with 0 that it
+// went away. A keeper from before Front skips it.
+func (c *Conn) Front(d time.Duration) error {
+	b, _ := json.Marshal(front{For: int(d / time.Second)})
+	return c.send(frameFront, b)
+}
+
 // Stop ends the program gently — SIGTERM, then SIGKILL if it is still there after the keeper's
 // grace period — and then the keeper. The connection stays open: the program's Exit comes on it.
 func (c *Conn) Stop() error { return c.send(frameStop, nil) }

@@ -80,6 +80,7 @@ const (
 	frameStop   = 14
 	frameWho    = 15
 	frameTake   = 16
+	frameFront  = 17
 )
 
 // Hello is what a keeper says first on every connection.
@@ -241,6 +242,10 @@ type Description struct {
 	// 2026-10-26; absent while none does, and from earlier keepers). Attached and Meta.Client stay
 	// the holder's.
 	Watchers []Who `json:"watchers,omitempty"`
+	// Push says the keeper program tells a user who is away what the program needs (SpectaShell's
+	// push, Docs/design/08-PUSH.md §4.5): its connections' Front matters. Absent from earlier
+	// keepers, whose shells never notify.
+	Push bool `json:"push,omitempty"`
 }
 
 // Info is what runs in the shell, as the keeper reads it beside it (Docs/design/02-CONNECTIONS.md

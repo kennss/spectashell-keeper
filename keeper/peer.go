@@ -55,6 +55,8 @@ type peer struct {
 	cols, rows int
 	// lastInfo is the Info it was last sent.
 	lastInfo *Info
+	// leaseUntil is when its lease of being in front runs out (Front, observe.go); zero: none.
+	leaseUntil time.Time
 
 	qmu     sync.Mutex
 	qcond   *sync.Cond

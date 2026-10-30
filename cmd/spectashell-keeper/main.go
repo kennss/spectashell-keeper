@@ -42,6 +42,10 @@
 //   spectashell-keeper pages-relay <device>
 //       run by the core over an exec channel: the device's socket for page commands on this host,
 //       passed through the channel (pages/relay.go)
+//   spectashell-keeper push add | push remove <device tag> | push list
+//       a device's push registration on this host (host/push, cli.go; SpectaShell's
+//       Docs/design/08-PUSH.md §3.2): add reads it on standard input, makes this host's signing key
+//       here and prints its public half; remove deletes one; list prints them without their keys
 //
 // Notes:
 // - build is set at link time (-ldflags "-X main.build=…") by scripts/build-keeper.sh.
@@ -81,6 +85,7 @@ import (
 	"github.com/kennss/spectashell-keeper/host/hostboot"
 	"github.com/kennss/spectashell-keeper/host/hostkeeper"
 	"github.com/kennss/spectashell-keeper/host/pages"
+	"github.com/kennss/spectashell-keeper/host/push"
 	"github.com/kennss/spectashell-keeper/keeper"
 	"github.com/kennss/spectashell-keeper/termhost"
 )
@@ -103,7 +108,13 @@ func main() {
 	}
 	switch os.Args[1] {
 	case "keep":
-		os.Exit(keeper.Main())
+		// The keeper tells a device that asked, and is away, what its program needs (host/push).
+		os.Exit(keeper.MainObserved(push.Observer))
+	case "push":
+		if err := push.Command(os.Args[2:], os.Stdin, os.Stdout); err != nil {
+			fmt.Fprintln(os.Stderr, "push:", err)
+			os.Exit(1)
+		}
 	case "start":
 		answer := start(os.Stdin)
 		_ = json.NewEncoder(os.Stdout).Encode(answer)

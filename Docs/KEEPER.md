@@ -56,6 +56,7 @@ key it does not know is ignored, and nothing that exists changes meaning.
 | 14 Stop | client → keeper | None: `SIGTERM` to the program's whole process group, `SIGKILL` 10 seconds later, until it is empty; then the keeper ends |
 | 15 Who | client → keeper | *(sdTerm, 2026-10-26)* JSON `{client, client_id}`: names this connection, and says it can watch (§2.1) |
 | 16 Take | client → keeper | *(sdTerm, 2026-10-26)* None: a watcher takes the keyboard (§2.1) |
+| 17 Front | client → keeper | *(sdTerm, 2026-10-30)* JSON `{"for": seconds}`: this connection's device is in front, looking, for that long (at most 300); `{"for": 0}`: it went away (§2.2) |
 
 Each connection gets, in order: Hello; the kept output — first the sequences that put back the modes
 the program set in output no longer kept, then the last 1 MiB of output from a clean place (the
@@ -111,6 +112,21 @@ waiting is closed, and can join again for a replay.
 a client meaning to watch never takes such a keeper over; `spectashell-keeper join` exits 3 and says
 so.
 
+### 2.2 Who is looking
+
+*(sdTerm, 2026-10-30; SpectaShell's Docs/design/08-PUSH.md §4.2.)* A keeper whose program asked
+for the user — a status becoming `blocked` or `done` (§4), a program's own notification (OSC 9,
+777, 99), a command that ran long — may tell a device that is away (the keeper program's observer,
+`MainObserved`). It must first know whether anyone is looking. A connection says so with **Front**:
+a lease, sent as it connects and again before it runs out while its device is in front, and
+`{"for": 0}` as the device goes away. A connection counts as looking only while its lease runs, so
+a device suspended before it could say so, or one that lost its network while its socket stays open
+on the host, stops counting by itself. A connection that never sent Front — a client from before it
+— is not looking. A keeper from before Front skips the frame (§2) and tells no one.
+
+The keeper's own emulator, which reads all the output as it comes (the preview's), keeps the time,
+so a command's length is known with no client there.
+
 ## 3. Meta
 
 What a keeper remembers for the next client, and describes itself with:
@@ -146,6 +162,7 @@ to a temporary name and renamed, so a reader never sees half of one.
 | `screen_title` | *(2026-10-25)* The title the program set (OSC 0 or 2), as the keeper's emulator holds it: Claude Code names its task in it; absent while it set none |
 | `status`, `status_kind` | *(2026-10-29)* What the program says it is doing, as the keeper's emulator reads its OSC 7501 records: the most pressing state (`blocked`, `error`, `working`, `done`, `idle`) and, with `blocked`, why (`permission`, `question`, `auth`). Written with the preview, when it changed. A `working` or `blocked` record ends when the shell is back in front (the keeper reads what runs while one is there, with no client too) or at the next prompt mark; absent while the program says nothing, and from earlier keepers |
 | `watchers` | *(2026-10-26)* The connections watching (§2.1), each `{client, client_id}` as it named itself; absent while none does. `attached` and `meta.client` stay the holder's |
+| `push` | *(2026-10-30)* The keeper program tells a device that is away what the program needs (§2.2): its connections' Front matters. Absent from earlier keepers, whose shells never tell |
 
 A keeper touches its sockets, its description and the two folders above them every hour, so that
 age-based cleaning of `/tmp` (systemd-tmpfiles) never removes them while it runs.
@@ -237,3 +254,4 @@ steps did not end another.
 | 2026-10-26 | sdTerm: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
 | 2026-10-27 | sdTerm: `origin` in Meta |
 | 2026-10-30 | sdTerm: `arrangement` in Meta |
+| 2026-10-30 | sdTerm: Front; `push` in descriptions |

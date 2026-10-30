@@ -6,7 +6,8 @@
 // sealed for the device (Docs/design/08-PUSH.md §4.5, §5.1): the request a keeper sends, the bytes
 // every request is signed over, a host key's id, the tag a keeper's notifications collapse under,
 // and the notification itself, sealed with HPKE to the key the device made for this host. The
-// keeper program sends with it (send.go) and the relay checks with it, so the two never differ.
+// keeper program sends with it (host/push) and the relay checks with it, so the two never differ;
+// it imports nothing of the keeper, so the relay brings none of it.
 //
 // Notes:
 // - Nothing here names a server: the relay's address is in the host's file, put there by the device
@@ -21,7 +22,7 @@
 //   ciphertext. The plaintext is padded with spaces after its JSON to PaddedSize, so its length
 //   does not tell the state or the program.
 
-package push
+package pushwire
 
 import (
 	"crypto/ecdh"

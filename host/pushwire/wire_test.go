@@ -7,7 +7,7 @@
 // sealed bytes open with the device's key for that host only, bound to the key id, always one size;
 // a program's words come cleaned and cut.
 
-package push
+package pushwire
 
 import (
 	"crypto/ecdh"
@@ -112,8 +112,8 @@ func TestALongNotificationIsCutToFit(t *testing.T) {
 func TestAProgramsWordsAreCleaned(t *testing.T) {
 	cases := map[string]string{
 		"Needs\x1b[31m you\r\n  now": "Needs[31m you now",
-		"evil‮gnp.exe":         "evilgnp.exe",
-		"  \t  ":                    "",
+		"evil‮gnp.exe":               "evilgnp.exe",
+		"  \t  ":                     "",
 	}
 	for in, want := range cases {
 		if got := CleanText(in); got != want {

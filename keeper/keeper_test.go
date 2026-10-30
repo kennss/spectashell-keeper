@@ -31,6 +31,9 @@ import (
 
 func TestMain(m *testing.M) {
 	if os.Getenv("SDTERM_KEEPER_HELPER") == "1" {
+		if path := os.Getenv("SDTERM_KEEPER_NOTICES"); path != "" {
+			os.Exit(MainObserved(func(v View) Observer { return &fileObserver{path: path, view: v} }))
+		}
 		os.Exit(Main())
 	}
 	os.Exit(m.Run())
