@@ -143,6 +143,9 @@ message KeptTerminal {
   // 2026-10-29.
   string status = 18;
   string status_kind = 19;
+  // Where its client last said it sits among others (KEEPER.md §3, `arrangement`), as given; empty
+  // when none did. 2026-10-30.
+  string arrangement = 20;
 }
 
 // A client of a kept terminal, as it named itself to the keeper (KEEPER.md §2.1).

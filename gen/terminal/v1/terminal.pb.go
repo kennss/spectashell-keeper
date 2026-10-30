@@ -1002,8 +1002,11 @@ type KeptTerminal struct {
 	// OSC 7501 state ("blocked", "error", "working", "done", "idle") and, with blocked, why
 	// ("permission", "question", "auth"); empty while it says nothing, or from a keeper before
 	// 2026-10-29.
-	Status        string `protobuf:"bytes,18,opt,name=status,proto3" json:"status,omitempty"`
-	StatusKind    string `protobuf:"bytes,19,opt,name=status_kind,json=statusKind,proto3" json:"status_kind,omitempty"`
+	Status     string `protobuf:"bytes,18,opt,name=status,proto3" json:"status,omitempty"`
+	StatusKind string `protobuf:"bytes,19,opt,name=status_kind,json=statusKind,proto3" json:"status_kind,omitempty"`
+	// Where its client last said it sits among others (KEEPER.md §3, `arrangement`), as given; empty
+	// when none did. 2026-10-30.
+	Arrangement   string `protobuf:"bytes,20,opt,name=arrangement,proto3" json:"arrangement,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1167,6 +1170,13 @@ func (x *KeptTerminal) GetStatus() string {
 func (x *KeptTerminal) GetStatusKind() string {
 	if x != nil {
 		return x.StatusKind
+	}
+	return ""
+}
+
+func (x *KeptTerminal) GetArrangement() string {
+	if x != nil {
+		return x.Arrangement
 	}
 	return ""
 }
@@ -3557,7 +3567,7 @@ const file_terminal_v1_terminal_proto_rawDesc = "" +
 	"\btriggers\x18\x02 \x03(\v2\x1c.terminal.v1.TerminalTriggerR\btriggers\"7\n" +
 	"\x11TerminalTriggered\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04line\x18\x02 \x01(\tR\x04line\"\xd8\x04\n" +
+	"\x04line\x18\x02 \x01(\tR\x04line\"\xfa\x04\n" +
 	"\fKeptTerminal\x12\x1b\n" +
 	"\tkeeper_id\x18\x01 \x01(\tR\bkeeperId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12+\n" +
@@ -3582,7 +3592,8 @@ const file_terminal_v1_terminal_proto_rawDesc = "" +
 	"\x06origin\x18\x11 \x01(\tR\x06origin\x12\x16\n" +
 	"\x06status\x18\x12 \x01(\tR\x06status\x12\x1f\n" +
 	"\vstatus_kind\x18\x13 \x01(\tR\n" +
-	"statusKind\"C\n" +
+	"statusKind\x12 \n" +
+	"\varrangement\x18\x14 \x01(\tR\varrangement\"C\n" +
 	"\fTerminalPeer\x12\x16\n" +
 	"\x06client\x18\x01 \x01(\tR\x06client\x12\x1b\n" +
 	"\tclient_id\x18\x02 \x01(\tR\bclientId\"/\n" +

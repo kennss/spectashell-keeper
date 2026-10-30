@@ -22,7 +22,7 @@
 //   from before Size skips it and draws the whole replay at one size, as it always did.
 // - Session -> keeper: Input (bytes), Resize (2 + 2 bytes, columns and rows), Meta (JSON, what the
 //   keeper remembers for the next session: owner, persist, title, directory, restoration id, the
-//   origin its starting client gave it, and for a web app's server its port and token), Hangup, and Stop (added 2026-10-19 for web apps'
+//   origin its starting client gave it, its arrangement among others, and for a web app's server its port and token), Hangup, and Stop (added 2026-10-19 for web apps'
 //   servers: SIGTERM, SIGKILL after stopGrace, then the keeper ends). Hangup carries the client
 //   that hangs up (Who, JSON, sdTerm, 2026-10-26); a keeper from before reads none, and one hung
 //   up by an earlier client gets an empty payload and names no one.
@@ -121,6 +121,16 @@ type Meta struct {
 	// whoever attaches later, by whatever address, never changes it, so every client names the
 	// terminal alike — two saved hosts of one machine each listed its keepers under its own name.
 	Origin string `json:"origin,omitempty"`
+	// Arrangement is the client's description of where the terminal sits among others (sdTerm: the
+	// desk it is in, as JSON; added 2026-10-30), kept as given and read only by clients. A client
+	// watching never sets it, as it sets nothing of Meta.
+	Arrangement string `json:"arrangement,omitempty"`
+	// StartedBy is the client that started the program, as it names itself (sdTerm, added
+	// 2026-10-30), given in the keeper's Config and kept by the keeper itself: a client's Meta
+	// never changes it, so a client of an earlier build, which knows no such key, cannot drop it.
+	// A client closing a terminal another device started leaves it to its keeper rather than
+	// ending it. Nil for a keeper started before, or by a client that gave none.
+	StartedBy *Who `json:"started_by,omitempty"`
 }
 
 // Server is what a keeper remembers of the web app's server it holds.

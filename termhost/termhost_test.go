@@ -1,6 +1,6 @@
 // termhost_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: a terminal on a real keeper (this test binary re-run as `keep`): its frames show the
 // program's output and the replay after a reattach; a terminal whose keeper another client took
@@ -10,7 +10,8 @@
 // which names each variable once; a terminal that joined a keeper to watch, drawn at the
 // program's size, typing nothing, until it takes the keyboard (2026-10-26); and a resize reaching
 // the program in the keeper, a shell's terminal size and a full-screen program's redraw
-// (2026-10-27, Equalize Splits).
+// (2026-10-27, Equalize Splits); the arrangement the holder tells its keeper, and none a watcher
+// tells (2026-10-30).
 
 //go:build unix
 
@@ -415,6 +416,43 @@ func TestAWatcherDrawsAtTheProgramsSizeUntilItTakesTheKeyboard(t *testing.T) {
 		ackAll(va, pa)
 		return strings.Contains(va.screen(), "taken-7")
 	})
+}
+
+func TestTheHoldersArrangementIsKeptAndAWatchersIsNot(t *testing.T) {
+	dir := shortDir(t)
+	conn := startKeeper(t, dir, "r1", []string{"/bin/sh"})
+	va := newViews()
+	a, pa := attach(conn, va)
+	defer a.Close()
+	defer pa.Stop()
+	described := func() string {
+		for _, d := range keeper.List(dir) {
+			if d.KeeperID == "r1" {
+				return d.Meta.Arrangement
+			}
+		}
+		return ""
+	}
+
+	a.RememberArrangement(`{"id":"desk-1"}`)
+	waitFor(t, "the holder's arrangement in the description", func() bool { return described() == `{"id":"desk-1"}` })
+
+	joined, err := keeper.DialJoin(keeper.SocketPath(dir, "r1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	vb := newViews()
+	b, pb2 := attachAs(joined, vb, true)
+	defer b.Detach()
+	defer pb2.Stop()
+	b.RememberArrangement(`{"id":"desk-2"}`)
+	// The holder's next one is written after the watcher's would have been: the description then shows
+	// whether the watcher's ever was.
+	a.RememberArrangement(`{"id":"desk-3"}`)
+	waitFor(t, "the holder's next arrangement", func() bool { return described() == `{"id":"desk-3"}` })
+	if b.meta.Arrangement == `{"id":"desk-2"}` {
+		t.Fatal("a watcher kept an arrangement of its own")
+	}
 }
 
 // getenv is what a C program reads: the first of two values (2026-10-23: a LANG the engine's user

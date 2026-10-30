@@ -682,6 +682,8 @@ func (k *keeper) session(conn net.Conn, join bool) {
 			var m Meta
 			if holds && json.Unmarshal(payload, &m) == nil {
 				k.out.Lock()
+				// Who started the program is the keeper's to keep (Meta.StartedBy).
+				m.StartedBy = k.meta.StartedBy
 				k.meta = m
 				k.describe()
 				k.out.Unlock()

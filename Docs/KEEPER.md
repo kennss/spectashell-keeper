@@ -125,6 +125,8 @@ What a keeper remembers for the next client, and describes itself with:
 | `client` | *(sdTerm, 2026-10-23)* The device that attached last, by its name ("Sam's MacBook Pro"), as that client tells it on attaching |
 | `client_id` | *(sdTerm, 2026-10-25)* That device's own id, which tells it apart from another of the same name (every iPad is "iPad" to an app) |
 | `origin` | *(sdTerm, 2026-10-27)* The starting client's own name for where it started the program from — sdTerm's saved host it reached the keeper through — kept as given: a client attaching later never changes it, so every client names the terminal alike whatever address it reaches the host by |
+| `arrangement` | *(sdTerm, 2026-10-30)* The client's description of where the terminal sits among others — sdTerm's: the desk it is in, as JSON — kept as given and read only by clients; a client watching (§2.1) never sets it |
+| `started_by` | *(sdTerm, 2026-10-30)* The client that started the program, `{client, client_id}`, given in the keeper's configuration and kept by the keeper itself: a client's Meta never changes it, so one of an earlier build, which knows no such key, cannot drop it. sdTerm closes a terminal another device started by leaving it to its keeper. Absent for a keeper started before |
 
 ## 4. Descriptions
 
@@ -234,3 +236,4 @@ steps did not end another.
 | 2026-10-25 | sdTerm: `client_id` in Meta; `preview`, `full_screen` and `screen_title` in descriptions; a socket or description removed is made again |
 | 2026-10-26 | sdTerm: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
 | 2026-10-27 | sdTerm: `origin` in Meta |
+| 2026-10-30 | sdTerm: `arrangement` in Meta |

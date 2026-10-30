@@ -528,6 +528,18 @@ func (t *Terminal) RememberRestorationID(id string) {
 	_ = t.link.SetMeta(t.meta)
 }
 
+// RememberArrangement tells the link's keeper the owner's description of where the terminal sits
+// among others (keeper.Meta.Arrangement), when it changes; a terminal watching tells it nothing.
+func (t *Terminal) RememberArrangement(arrangement string) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.watching.Load() || arrangement == t.meta.Arrangement {
+		return
+	}
+	t.meta.Arrangement = arrangement
+	_ = t.link.SetMeta(t.meta)
+}
+
 // SyncHeld reports whether the program holds synchronized output (DECSET 2026).
 func (t *Terminal) SyncHeld() bool {
 	t.mu.Lock()

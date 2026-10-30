@@ -1,6 +1,6 @@
 // describe_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-10-30
 //
 // Purpose: what sdTerm grew the keeper by (Docs/KEEPER.md): a client taken over is told so
 // (ErrTakenOver) instead of seeing its connection simply end; List reads each keeper's
@@ -10,7 +10,8 @@
 // keepers must be the user's own (EnsurePrivateDir); a keeper whose folder was removed makes its
 // socket and description again, and its shell is reached as before; a keeper describes its screen's
 // last lines, as its emulator draws them, for a device that lists it without connecting, and what
-// its program says it is doing (OSC 7501), ended once the shell is back in front.
+// its program says it is doing (OSC 7501), ended once the shell is back in front; and who started a
+// keeper is kept as its Config gave it.
 
 //go:build unix
 
@@ -394,5 +395,35 @@ func TestTheClientHearsWhatRunsInTheShell(t *testing.T) {
 	sleep := waitInfo("sleep in front", func(i Info) bool { return i.Program == "sleep 30" })
 	if sleep.ProgramPID == 0 || sleep.ProgramPID == shell.ProgramPID {
 		t.Fatalf("sleep's pid %d, the shell's %d", sleep.ProgramPID, shell.ProgramPID)
+	}
+}
+
+// Who started a keeper is described as its Config gave it, whatever a client's Meta says later: a
+// client of an earlier build sends Meta without it.
+func TestWhoStartedAKeeperIsKeptAsGiven(t *testing.T) {
+	dir := shortDir(t)
+	t.Setenv("SDTERM_KEEPER_HELPER", "1")
+	starter := &Who{Client: "Sam's MacBook Pro", ClientID: "mac-1"}
+	c, err := Start([]string{os.Args[0]}, Config{
+		Socket: SocketPath(dir, "s1"), KeeperID: "s1", Path: "/bin/sh", Argv: []string{"/bin/sh"}, Dir: dir,
+		Env: []string{"PATH=/usr/bin:/bin", "TERM=xterm-256color"}, Columns: 80, Rows: 24,
+		Meta: Meta{Owner: "test-owner", Persist: true, StartedBy: starter},
+	}, 5*time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { hangUpLeftover(SocketPath(dir, "s1")) })
+	defer c.Hangup(Who{})
+	if err := c.SetMeta(Meta{Owner: "test-owner", Persist: true, Title: "after", Client: "iPad",
+		StartedBy: &Who{Client: "iPad", ClientID: "ipad-1"}}); err != nil {
+		t.Fatal(err)
+	}
+	var found []Description
+	waitFor(t, "the description with the new title", func() bool {
+		found = List(dir)
+		return len(found) == 1 && found[0].Meta.Title == "after"
+	})
+	if got := found[0].Meta.StartedBy; got == nil || *got != *starter {
+		t.Fatalf("started_by = %+v, want %+v", got, starter)
 	}
 }
