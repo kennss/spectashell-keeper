@@ -1006,7 +1006,10 @@ type KeptTerminal struct {
 	StatusKind string `protobuf:"bytes,19,opt,name=status_kind,json=statusKind,proto3" json:"status_kind,omitempty"`
 	// Where its client last said it sits among others (KEEPER.md §3, `arrangement`), as given; empty
 	// when none did. 2026-10-30.
-	Arrangement   string `protobuf:"bytes,20,opt,name=arrangement,proto3" json:"arrangement,omitempty"`
+	Arrangement string `protobuf:"bytes,20,opt,name=arrangement,proto3" json:"arrangement,omitempty"`
+	// Its keeper tells a device that is away what the program needs (KEEPER.md §4, `push`); false
+	// from a keeper before 2026-10-30, whose shell never does.
+	Push          bool `protobuf:"varint,21,opt,name=push,proto3" json:"push,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1179,6 +1182,13 @@ func (x *KeptTerminal) GetArrangement() string {
 		return x.Arrangement
 	}
 	return ""
+}
+
+func (x *KeptTerminal) GetPush() bool {
+	if x != nil {
+		return x.Push
+	}
+	return false
 }
 
 // A client of a kept terminal, as it named itself to the keeper (KEEPER.md §2.1).
@@ -3567,7 +3577,7 @@ const file_terminal_v1_terminal_proto_rawDesc = "" +
 	"\btriggers\x18\x02 \x03(\v2\x1c.terminal.v1.TerminalTriggerR\btriggers\"7\n" +
 	"\x11TerminalTriggered\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04line\x18\x02 \x01(\tR\x04line\"\xfa\x04\n" +
+	"\x04line\x18\x02 \x01(\tR\x04line\"\x8e\x05\n" +
 	"\fKeptTerminal\x12\x1b\n" +
 	"\tkeeper_id\x18\x01 \x01(\tR\bkeeperId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12+\n" +
@@ -3593,7 +3603,8 @@ const file_terminal_v1_terminal_proto_rawDesc = "" +
 	"\x06status\x18\x12 \x01(\tR\x06status\x12\x1f\n" +
 	"\vstatus_kind\x18\x13 \x01(\tR\n" +
 	"statusKind\x12 \n" +
-	"\varrangement\x18\x14 \x01(\tR\varrangement\"C\n" +
+	"\varrangement\x18\x14 \x01(\tR\varrangement\x12\x12\n" +
+	"\x04push\x18\x15 \x01(\bR\x04push\"C\n" +
 	"\fTerminalPeer\x12\x16\n" +
 	"\x06client\x18\x01 \x01(\tR\x06client\x12\x1b\n" +
 	"\tclient_id\x18\x02 \x01(\tR\bclientId\"/\n" +

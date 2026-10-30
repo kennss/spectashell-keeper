@@ -65,10 +65,13 @@ type LinkInfo struct {
 	// Exited is set when the program ended before the link was attached; its exit follows the
 	// replay.
 	Exited bool
+	// Push says the keeper tells a device that is away what its program needs (keeper.Hello.Push),
+	// so whether its client's device is in front matters.
+	Push bool
 }
 
 // KeeperInfo is the LinkInfo of a keeper connection, from its Hello.
 func KeeperInfo(c *keeper.Conn) LinkInfo {
 	return LinkInfo{PID: c.Hello.PID, Columns: c.Hello.Columns, Rows: c.Hello.Rows, Meta: c.Hello.Meta,
-		Exited: c.Hello.Exited}
+		Exited: c.Hello.Exited, Push: c.Hello.Push}
 }

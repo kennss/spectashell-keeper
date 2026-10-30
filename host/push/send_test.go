@@ -194,7 +194,7 @@ func setUp(t *testing.T, events Events) (*fakeRelay, *fakeView, *Sender, string,
 		startedBy: &keeper.Who{Client: "iPhone", ClientID: "owner-device"}}
 	done := make(passes, 64)
 	s := NewSender(view, Options{RootCAs: roots, Interval: 300 * time.Millisecond, Backoff: 50 * time.Millisecond,
-		Handled: func() { done <- struct{}{} }})
+		LookEvery: 20 * time.Millisecond, Handled: func() { done <- struct{}{} }})
 	return relay, view, s, dir, done
 }
 
@@ -291,9 +291,9 @@ func TestANoticeGoesSignedSealedAtTheRelaysTime(t *testing.T) {
 
 func TestNothingGoesThatShouldNot(t *testing.T) {
 	relay, view, s, _, p := setUp(t, allEvents)
-	// An owner looking.
+	// A program's notification while an owner looks: a moment seen where it happened.
 	view.set(func(v *fakeView) { v.looking = true })
-	notice(t, s, p, keeper.Notice{Kind: "blocked", Status: term.Status{State: "blocked"}})
+	notice(t, s, p, keeper.Notice{Kind: "notify", Title: "Build", Body: "done"})
 	// A command shorter than asked.
 	view.set(func(v *fakeView) { v.looking = false })
 	notice(t, s, p, keeper.Notice{Kind: "command", Command: "ls", Duration: 3 * time.Second})
@@ -315,19 +315,65 @@ func TestABlockedNoticeAnsweredMeanwhileIsDropped(t *testing.T) {
 	if got := relay.next(); got.status != http.StatusServiceUnavailable {
 		t.Fatalf("first: %d", got.status)
 	}
-	// Answered at the Mac before the retry.
-	view.set(func(v *fakeView) { v.status = term.Status{State: "working"} })
+	// Answered at the Mac before the retry; then the program finished.
+	view.set(func(v *fakeView) { v.status = term.Status{State: "done"} })
 	s.Notice(keeper.Notice{Kind: "done", Status: term.Status{State: "done"}})
 	if got := relay.next(); got.note.State != "done" {
 		t.Fatalf("after the answer, %s was sent, not done alone", got.note.State)
 	}
 }
 
+func TestWhatComesWhileAnOwnerLooksGoesWhenTheyLeave(t *testing.T) {
+	relay, view, s, _, p := setUp(t, allEvents)
+	view.set(func(v *fakeView) { v.looking = true })
+	// Waiting for permission while the user is at the Mac: held, not dropped.
+	notice(t, s, p, keeper.Notice{Kind: "blocked", Status: term.Status{State: "blocked", Kind: "permission"}})
+	// Looked at again, still held.
+	p.wait(t)
+	p.wait(t)
+	if len(relay.received) != 0 {
+		t.Fatal("it was sent while an owner looked")
+	}
+	// They lock the Mac and leave, the program still waiting: it goes.
+	view.set(func(v *fakeView) { v.looking = false })
+	if got := relay.next(); got.note.State != "blocked" || got.note.Kind != "permission" {
+		t.Fatalf("after they left: %+v", got)
+	}
+}
+
+func TestAHeldNoticeThatPassedIsNotSent(t *testing.T) {
+	relay, view, s, _, p := setUp(t, allEvents)
+	view.set(func(v *fakeView) { v.looking = true })
+	notice(t, s, p, keeper.Notice{Kind: "blocked", Status: term.Status{State: "blocked"}})
+	// Answered at the Mac, then they left.
+	view.set(func(v *fakeView) { v.status = term.Status{State: "working"} })
+	p.wait(t)
+	view.set(func(v *fakeView) { v.looking = false })
+	p.wait(t)
+	// The next push the relay sees is the one after it.
+	view.set(func(v *fakeView) { v.status = term.Status{State: "done"} })
+	s.Notice(keeper.Notice{Kind: "done", Status: term.Status{State: "done"}})
+	if got := relay.next(); got.note.State != "done" {
+		t.Fatalf("a passed blocked was sent: %+v", got)
+	}
+}
+
+func TestNotifyAnywaySendsWhileAnOwnerLooks(t *testing.T) {
+	relay, view, s, _, _ := setUp(t, Events{Blocked: true, Done: true, Notify: true, WhenLooking: "send"})
+	view.set(func(v *fakeView) { v.looking = true })
+	s.Notice(keeper.Notice{Kind: "notify", Title: "Build", Body: "done"})
+	if got := relay.next(); got.note.State != "notify" {
+		t.Fatalf("with Notify Anyway: %+v", got)
+	}
+}
+
 func TestABurstWaitsButBlockedNever(t *testing.T) {
-	relay, _, s, _, _ := setUp(t, allEvents)
+	relay, view, s, _, _ := setUp(t, allEvents)
 	start := time.Now()
+	view.set(func(v *fakeView) { v.status = term.Status{State: "done"} })
 	s.Notice(keeper.Notice{Kind: "done", Status: term.Status{State: "done"}})
 	relay.next()
+	view.set(func(v *fakeView) { v.status = term.Status{State: "blocked"} })
 	s.Notice(keeper.Notice{Kind: "notify", Title: "Build", Body: "one"})
 	s.Notice(keeper.Notice{Kind: "notify", Title: "Build", Body: "two"})
 	s.Notice(keeper.Notice{Kind: "blocked", Status: term.Status{State: "blocked"}})
@@ -341,8 +387,10 @@ func TestABurstWaitsButBlockedNever(t *testing.T) {
 }
 
 func TestAKeyTheRelayDoesNotKnowWaitsAndOneRemovedGoes(t *testing.T) {
-	relay, _, s, dir, p := setUp(t, allEvents)
+	relay, view, s, dir, p := setUp(t, allEvents)
 	relay.answer(http.StatusNotFound)
+	// The program says what each notice says: one that passed would not be sent.
+	view.set(func(v *fakeView) { v.status = term.Status{State: "done"} })
 	notice(t, s, p, keeper.Notice{Kind: "done", Status: term.Status{State: "done"}})
 	relay.next()
 	state := LoadState("device-tag-1")
@@ -352,6 +400,7 @@ func TestAKeyTheRelayDoesNotKnowWaitsAndOneRemovedGoes(t *testing.T) {
 	// Seven days of 404: given up.
 	SaveState("device-tag-1", State{UnknownSince: time.Now().Add(-8 * 24 * time.Hour).Unix()})
 	relay.answer(http.StatusNotFound)
+	view.set(func(v *fakeView) { v.status = term.Status{State: "blocked"} })
 	notice(t, s, p, keeper.Notice{Kind: "blocked", Status: term.Status{State: "blocked"}})
 	relay.next()
 	if !LoadState("device-tag-1").GivenUp {

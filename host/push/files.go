@@ -50,13 +50,20 @@ type Registration struct {
 	sealing []byte
 }
 
-// Events are the notifications the device wants from this host.
+// Events are the notifications the device wants from this host: the user's rules (08-PUSH.md
+// §3.3).
 type Events struct {
 	Blocked        bool `json:"blocked"`
 	Done           bool `json:"done"`
 	Notify         bool `json:"notify"`
 	CommandSeconds int  `json:"command_seconds"` // 0: never
+	// WhenLooking is what a notice that comes while an owner looks becomes: "hold" (or empty, a
+	// file from before it) keeps a blocked or done until no owner looks; "send" sends it anyway.
+	WhenLooking string `json:"when_looking,omitempty"`
 }
+
+// SendsWhileLooking says whether an owner looking keeps nothing back.
+func (e Events) SendsWhileLooking() bool { return e.WhenLooking == "send" }
 
 // State is what keepers learned sending with a registration.
 type State struct {

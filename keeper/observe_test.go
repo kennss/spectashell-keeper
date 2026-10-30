@@ -88,6 +88,9 @@ func TestAKeeperNoticesWhatAUserAwayWouldWant(t *testing.T) {
 	if found := List(dir); len(found) != 1 || !found[0].Push {
 		t.Fatalf("the description does not say it pushes: %+v", found)
 	}
+	if !c.Hello.Push {
+		t.Fatal("the hello does not say it pushes")
+	}
 	_ = c.Input([]byte("printf '\\033]7501;state=blocked:id=main:kind=permission\\007'\n"))
 	waitFor(t, "a blocked notice", func() bool { return len(readNotices(notices)) >= 1 })
 	// The same status again is not news.

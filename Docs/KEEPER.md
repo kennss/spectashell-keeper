@@ -41,7 +41,7 @@ key it does not know is ignored, and nothing that exists changes meaning.
 
 | Type | Direction | Payload |
 |---|---|---|
-| 1 Hello | keeper → client | JSON: `version` (1), `keeper_id`, `pid` (the program's), `columns`, `rows`, `started` (Unix seconds), `meta`, `exited` |
+| 1 Hello | keeper → client | JSON: `version` (1), `keeper_id`, `pid` (the program's), `columns`, `rows`, `started` (Unix seconds), `meta`, `exited`, `push` (as in descriptions; 2026-10-30) |
 | 2 Output | keeper → client | The program's output |
 | 3 ReplayEnd | keeper → client | None: the kept output ends here, live output follows |
 | 4 Exit | keeper → client | JSON: `code` (-1 for a signal), `signal` (`SIGHUP`) |
@@ -254,4 +254,4 @@ steps did not end another.
 | 2026-10-26 | sdTerm: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
 | 2026-10-27 | sdTerm: `origin` in Meta |
 | 2026-10-30 | sdTerm: `arrangement` in Meta |
-| 2026-10-30 | sdTerm: Front; `push` in descriptions |
+| 2026-10-30 | sdTerm: Front; `push` in descriptions and Hello |

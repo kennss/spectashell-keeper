@@ -16,6 +16,10 @@
 // - Before every send, first or again, it looks again: nothing while an owner holds a lease; a
 //   blocked notice only while the program still says it is blocked (answered at the Mac meanwhile,
 //   it would arrive on the iPhone as still waiting, 08-PUSH.md §4.4).
+// - While an owner looks (08-PUSH.md §4.2): a blocked or done is held, for up to `holdFor`, and
+//   looked at again every `lookEvery`; once no owner looks it goes if the program still says the
+//   same. A program's notification or a command's end, a moment seen where it happened, is
+//   dropped. A registration whose rules say "send" holds nothing back.
 // - Answers: 202 sent; 404 the relay does not know the key — tried again after an hour, given up
 //   after 7 days, until the device writes the file again; 410 the key was removed — the file goes;
 //   429 tried after Retry-After; 503, a timeout, no connection: tried with backoff; anything held
@@ -55,8 +59,9 @@ type Sender struct {
 	now     func() time.Time
 
 	// interval is the least time between two pushes of the keeper; giveUp, how long a notice may
-	// wait to be sent; backoff, the first pause after a relay's trouble.
-	interval, giveUp, backoff time.Duration
+	// wait to be sent; backoff, the first pause after a relay's trouble; holdFor, how long a notice
+	// waits for an owner to stop looking, looked at again every lookEvery.
+	interval, giveUp, backoff, holdFor, lookEvery time.Duration
 
 	mu      sync.Mutex
 	offsets map[string]int64 // per relay: its clock minus ours, seconds
@@ -84,6 +89,7 @@ type Options struct {
 	RootCAs   *x509.CertPool
 	Interval  time.Duration
 	Backoff   time.Duration
+	LookEvery time.Duration
 	// Handled is told after each pass over what is held: a notice taken and what was due sent.
 	Handled func()
 }
@@ -103,6 +109,7 @@ func NewSender(v keeper.View, o Options) *Sender {
 		client: &http.Client{Transport: transport, Timeout: 10 * time.Second,
 			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
 		interval: 10 * time.Second, giveUp: 10 * time.Minute, backoff: 15 * time.Second,
+		holdFor: time.Hour, lookEvery: 5 * time.Second,
 		offsets: map[string]int64{}, known: map[string]bool{}, handled: o.Handled, userAgent: o.UserAgent}
 	if s.userAgent == "" {
 		s.userAgent = "spectashell-keeper"
@@ -112,6 +119,9 @@ func NewSender(v keeper.View, o Options) *Sender {
 	}
 	if o.Backoff > 0 {
 		s.backoff = o.Backoff
+	}
+	if o.LookEvery > 0 {
+		s.lookEvery = o.LookEvery
 	}
 	go s.run()
 	return s
@@ -214,11 +224,18 @@ func (s *Sender) send(p pending) (pending, bool) {
 	if by := s.view.StartedBy(); len(r.Owners) > 0 && by != nil && !slices.Contains(r.Owners, by.ClientID) {
 		return p, false
 	}
-	if s.view.Looking(r.Owners, now) {
+	if !r.Events.SendsWhileLooking() && s.view.Looking(r.Owners, now) {
+		// Held until no owner looks — a blocked or done only, and not past the hour APNs would
+		// keep it (§4.2).
+		if (p.notice.Kind == "blocked" || p.notice.Kind == "done") && now.Sub(p.first) < s.holdFor {
+			p.due = now.Add(s.lookEvery)
+			return p, true
+		}
 		return p, false
 	}
-	if p.notice.Kind == "blocked" && s.view.Status().State != "blocked" {
-		return p, false // answered meanwhile
+	// What has passed is not sent late: answered meanwhile, or back at work since it was done.
+	if (p.notice.Kind == "blocked" || p.notice.Kind == "done") && s.view.Status().State != p.notice.Kind {
+		return p, false
 	}
 	status, retryAfter := s.post(r, p.notice)
 	switch {

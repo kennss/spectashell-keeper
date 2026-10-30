@@ -1,6 +1,6 @@
 // keeper_test.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-26
+// Created: 2026-10-14 · Last updated: 2026-10-30
 //
 // Purpose: keepers as real processes (this test binary re-run as `keep`): input and output, a
 // session detaching and another taking over with the kept output replayed and the remembered
@@ -134,7 +134,8 @@ func (r *recorder) wait(t *testing.T, what string, ok func(out string, replayEnd
 func TestDetachTakeOverAndReplay(t *testing.T) {
 	dir := shortDir(t)
 	c := startKeeper(t, dir, "a1", []string{"/bin/sh", "-c", "echo started; read x; echo got:$x; sleep 30"})
-	if c.Hello.Version != Version || c.Hello.KeeperID != "a1" || c.Hello.Exited || c.Hello.Meta.Owner != "test-owner" {
+	if c.Hello.Version != Version || c.Hello.KeeperID != "a1" || c.Hello.Exited || c.Hello.Meta.Owner != "test-owner" ||
+		c.Hello.Push {
 		t.Fatalf("hello %+v", c.Hello)
 	}
 	r := record(c)

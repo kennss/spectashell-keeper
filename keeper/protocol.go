@@ -94,6 +94,9 @@ type Hello struct {
 	Meta     Meta   `json:"meta"`
 	// Set when the program has ended (its Exit follows the replay too).
 	Exited bool `json:"exited"`
+	// Push is the description's (Description.Push), so a client attaching knows at once whether
+	// its Front matters; sdTerm's, added 2026-10-30, absent from earlier keepers.
+	Push bool `json:"push,omitempty"`
 }
 
 // Meta is what a keeper keeps for the next session.

@@ -749,7 +749,7 @@ func (k *keeper) session(conn net.Conn, join bool) {
 // written at, ReplayEnd, and the Exit if the program ended; out is held.
 func (k *keeper) replay() ([][]byte, error) {
 	hello := Hello{Version: Version, KeeperID: k.cfg.KeeperID, PID: k.cmd.Process.Pid, Columns: k.cols, Rows: k.rows,
-		Started: k.started.Unix(), Meta: k.meta, Exited: k.exit != nil}
+		Started: k.started.Unix(), Meta: k.meta, Exited: k.exit != nil, Push: k.observer != nil}
 	f, err := encodeJSON(frameHello, hello)
 	if err != nil {
 		return nil, err
