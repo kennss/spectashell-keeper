@@ -109,7 +109,7 @@ func main() {
 	switch os.Args[1] {
 	case "keep":
 		// The keeper tells a device that asked, and is away, what its program needs (host/push).
-		os.Exit(keeper.MainObserved(push.Observer))
+		os.Exit(keeper.MainObserved(push.Observer(build)))
 	case "push":
 		if err := push.Command(os.Args[2:], os.Stdin, os.Stdout); err != nil {
 			fmt.Fprintln(os.Stderr, "push:", err)

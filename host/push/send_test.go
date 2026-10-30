@@ -69,6 +69,9 @@ func (f *fakeRelay) now() time.Time { return time.Now().Add(f.ahead) }
 
 func (f *fakeRelay) serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(pushwire.ServerTime, strconv.FormatInt(f.now().Unix(), 10))
+	if !strings.HasPrefix(r.Header.Get("User-Agent"), "spectashell-keeper") {
+		f.t.Errorf("a request named %q, not the keeper program", r.Header.Get("User-Agent"))
+	}
 	if r.URL.Path == "/v1/time" {
 		return
 	}

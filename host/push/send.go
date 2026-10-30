@@ -63,7 +63,8 @@ type Sender struct {
 	known   map[string]bool  // relays whose time was asked or told
 
 	// handled is told after each pass over what is held (tests wait on it).
-	handled func()
+	handled   func()
+	userAgent string
 }
 
 // pending is a notice held for one registration.
@@ -75,17 +76,24 @@ type pending struct {
 	attempts int
 }
 
-// Options set what tests change.
+// Options set what tests change, and the program's name.
 type Options struct {
-	RootCAs  *x509.CertPool
-	Interval time.Duration
-	Backoff  time.Duration
+	// UserAgent names the program to the relay — and to Cloudflare in front of it, whose browser
+	// integrity check may refuse a request in Go's default name.
+	UserAgent string
+	RootCAs   *x509.CertPool
+	Interval  time.Duration
+	Backoff   time.Duration
 	// Handled is told after each pass over what is held: a notice taken and what was due sent.
 	Handled func()
 }
 
-// Observer makes the keeper program's observer of its keeper.
-func Observer(v keeper.View) keeper.Observer { return NewSender(v, Options{}) }
+// Observer makes the keeper program's observer of its keeper; build names the program to the relay.
+func Observer(build string) func(keeper.View) keeper.Observer {
+	return func(v keeper.View) keeper.Observer {
+		return NewSender(v, Options{UserAgent: "spectashell-keeper/" + build})
+	}
+}
 
 // NewSender makes a sender for v's notices and starts it.
 func NewSender(v keeper.View, o Options) *Sender {
@@ -95,7 +103,10 @@ func NewSender(v keeper.View, o Options) *Sender {
 		client: &http.Client{Transport: transport, Timeout: 10 * time.Second,
 			CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }},
 		interval: 10 * time.Second, giveUp: 10 * time.Minute, backoff: 15 * time.Second,
-		offsets: map[string]int64{}, known: map[string]bool{}, handled: o.Handled}
+		offsets: map[string]int64{}, known: map[string]bool{}, handled: o.Handled, userAgent: o.UserAgent}
+	if s.userAgent == "" {
+		s.userAgent = "spectashell-keeper"
+	}
 	if o.Interval > 0 {
 		s.interval = o.Interval
 	}
@@ -321,6 +332,7 @@ func (s *Sender) do(r Registration, method, path string, body []byte, at int64) 
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", s.userAgent)
 	req.Header.Set(pushwire.KeyHeader, r.KeyID)
 	req.Header.Set(pushwire.TimeHeader, signed.Time)
 	req.Header.Set(pushwire.NonceHeader, signed.Nonce)
@@ -351,6 +363,7 @@ func (s *Sender) askTime(relay string) {
 	if err != nil {
 		return
 	}
+	req.Header.Set("User-Agent", s.userAgent)
 	resp, err := s.client.Do(req)
 	if err != nil {
 		return
