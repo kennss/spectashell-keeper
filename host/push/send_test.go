@@ -1,6 +1,6 @@
 // send_test.go
 // Author: Kennt Kim
-// Created: 2026-10-30 · Last updated: 2026-10-30
+// Created: 2026-10-30 · Last updated: 2026-10-31
 //
 // Purpose: a host's push registrations and its keeper's sender (cli.go, files.go, send.go,
 // Docs/design/08-PUSH.md §3.2, §4) against a relay of the tests' own over TLS: add makes the host's

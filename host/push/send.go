@@ -1,6 +1,6 @@
 // send.go
 // Author: Kennt Kim
-// Created: 2026-10-30 · Last updated: 2026-10-30
+// Created: 2026-10-30 · Last updated: 2026-10-31
 //
 // Purpose: a keeper's notices sent to the devices that asked for them (Docs/design/08-PUSH.md §4):
 // the keeper program's observer of its keeper (keeper.MainObserved). For each registration of this

@@ -1,6 +1,6 @@
 // observe.go
 // Author: Kennt Kim
-// Created: 2026-10-30 · Last updated: 2026-10-30
+// Created: 2026-10-30 · Last updated: 2026-10-31
 //
 // Purpose: what a keeper notices for a user who is away, and who is looking (KEEPER.md §2.2, §4;
 // SpectaShell's Docs/design/08-PUSH.md §4): the keeper's own emulator, which reads all the output as
