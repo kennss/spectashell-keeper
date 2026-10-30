@@ -20,8 +20,9 @@
 //   looked at again every `lookEvery`; once no owner looks it goes if the program still says the
 //   same. A program's notification or a command's end, a moment seen where it happened, is
 //   dropped. A registration whose rules say "send" holds nothing back.
-// - Answers: 202 sent; 404 the relay does not know the key — tried again after an hour, given up
-//   after 7 days, until the device writes the file again; 410 the key was removed — the file goes;
+// - Answers: 202 sent; 404 the relay does not know the key — tried again after as long as it has
+//   been unknown, from a minute up to an hour, given up after 7 days, until the device writes the
+//   file again; 410 the key was removed — the file goes;
 //   429 tried after Retry-After; 503, a timeout, no connection: tried with backoff; anything held
 //   longer than 10 minutes is dropped.
 // - The time sent, in the request and sealed, is the relay's: every answer says it, and before the
@@ -249,7 +250,7 @@ func (s *Sender) send(p pending) (pending, bool) {
 			state.UnknownSince = now.Unix()
 		}
 		state.GivenUp = now.Unix()-state.UnknownSince >= 7*24*60*60
-		state.NextTry = now.Add(time.Hour).Unix()
+		state.NextTry = now.Add(unknownWait(now.Unix() - state.UnknownSince)).Unix()
 		SaveState(r.Tag, state)
 		return p, false
 	case status == http.StatusGone:
@@ -277,6 +278,25 @@ func (s *Sender) send(p pending) (pending, bool) {
 	return p, true
 }
 
+// shellName names the shell in a notification: its title, or, when a client left it none — a Mac
+// that opened it named its pane anew (2026-10-30, "MacbookPro" alone on the iPhone) — what runs in
+// it.
+func (s *Sender) shellName() string {
+	if title := strings.TrimSpace(s.view.Title()); title != "" {
+		return title
+	}
+	return s.view.Program()
+}
+
+// unknownWait is how long a key the relay has not known for `unknown` seconds waits before it is
+// tried again: as long as it has been unknown, from a minute up to an hour. A device whose
+// registration was still being proven gives its key within a minute or two, and its first
+// notifications should not wait an hour for it (the Mac, 2026-10-30); a key unknown for days is
+// asked about hourly, not every minute.
+func unknownWait(unknown int64) time.Duration {
+	return min(max(time.Duration(unknown)*time.Second, time.Minute), time.Hour)
+}
+
 func (s *Sender) registration(tag string) (Registration, bool) {
 	regs, _ := Registrations()
 	for _, r := range regs {
@@ -295,7 +315,7 @@ func (s *Sender) post(r Registration, n keeper.Notice) (int, time.Duration) {
 	}
 	at := s.relayTime()(r.Relay)
 	state := n.Kind
-	note := pushwire.Notification{V: 1, HostRef: r.HostRef, Keeper: s.view.KeeperID(), Shell: s.view.Title(),
+	note := pushwire.Notification{V: 1, HostRef: r.HostRef, Keeper: s.view.KeeperID(), Shell: s.shellName(),
 		Program: n.Status.App, State: state, At: at}
 	switch n.Kind {
 	case "blocked":

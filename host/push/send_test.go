@@ -128,12 +128,18 @@ func (f *fakeRelay) next() received {
 type fakeView struct {
 	mu        sync.Mutex
 	looking   bool
+	title     string
 	status    term.Status
 	startedBy *keeper.Who
 }
 
 func (v *fakeView) KeeperID() string { return "keeper-1" }
-func (v *fakeView) Title() string    { return "aurora" }
+func (v *fakeView) Title() string {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	return v.title
+}
+func (v *fakeView) Program() string { return "python3" }
 func (v *fakeView) StartedBy() *keeper.Who {
 	v.mu.Lock()
 	defer v.mu.Unlock()
@@ -190,7 +196,7 @@ func setUp(t *testing.T, events Events) (*fakeRelay, *fakeView, *Sender, string,
 	relay.keys[res.KeyID] = pub
 	roots := x509.NewCertPool()
 	roots.AddCert(relay.server.Certificate())
-	view := &fakeView{status: term.Status{State: "blocked", Kind: "permission"},
+	view := &fakeView{title: "aurora", status: term.Status{State: "blocked", Kind: "permission"},
 		startedBy: &keeper.Who{Client: "iPhone", ClientID: "owner-device"}}
 	done := make(passes, 64)
 	s := NewSender(view, Options{RootCAs: roots, Interval: 300 * time.Millisecond, Backoff: 50 * time.Millisecond,
@@ -420,5 +426,25 @@ func TestAKeyTheRelayDoesNotKnowWaitsAndOneRemovedGoes(t *testing.T) {
 	p.wait(t)
 	if _, err := os.Stat(filepath.Join(dir, "device-tag-1.json")); !os.IsNotExist(err) {
 		t.Fatal("the file is still there after 410")
+	}
+}
+
+func TestAKeyNotKnownYetIsAskedAboutSoonThenHourly(t *testing.T) {
+	for _, c := range []struct {
+		unknown int64
+		want    time.Duration
+	}{{0, time.Minute}, {30, time.Minute}, {300, 5 * time.Minute}, {86400, time.Hour}} {
+		if got := unknownWait(c.unknown); got != c.want {
+			t.Errorf("unknown for %d s: waits %v, not %v", c.unknown, got, c.want)
+		}
+	}
+}
+
+func TestAShellWithNoTitleIsNamedByWhatRunsInIt(t *testing.T) {
+	relay, view, s, _, _ := setUp(t, allEvents)
+	view.set(func(v *fakeView) { v.title = "" })
+	s.Notice(keeper.Notice{Kind: "notify", Title: "Build", Body: "done"})
+	if got := relay.next(); got.note.Shell != "python3" {
+		t.Fatalf("the shell was named %q", got.note.Shell)
 	}
 }

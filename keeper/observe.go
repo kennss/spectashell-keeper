@@ -22,9 +22,12 @@ package keeper
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
+	"github.com/kennss/spectashell-keeper/paneinfo"
 	"github.com/kennss/spectashell-keeper/term"
 )
 
@@ -53,6 +56,9 @@ type View interface {
 	StartedBy() *Who
 	// Title is the last title a client saw (Meta.Title).
 	Title() string
+	// Program names what runs in front of the terminal now ("python3", "claude"; the shell's name at
+	// its prompt), read beside it; empty when it cannot be read.
+	Program() string
 	// Looking says whether a connection from one of owners' client ids (any, when owners is empty)
 	// holds an unexpired lease of being in front.
 	Looking(owners []string, now time.Time) bool
@@ -147,6 +153,22 @@ func (v view) Title() string {
 	v.k.out.Lock()
 	defer v.k.out.Unlock()
 	return v.k.meta.Title
+}
+
+func (v view) Program() string {
+	v.k.out.Lock()
+	directory := v.k.meta.Directory
+	v.k.out.Unlock()
+	read, err := paneinfo.NewReader().Read(v.k.cmd.Process.Pid, directory)
+	if err != nil {
+		return ""
+	}
+	// The command line's first word, as a name: "python3", not its path and arguments.
+	fields := strings.Fields(read.Program)
+	if len(fields) == 0 {
+		return ""
+	}
+	return filepath.Base(fields[0])
 }
 
 func (v view) Status() term.Status {
