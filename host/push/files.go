@@ -1,12 +1,12 @@
 // files.go
 // Author: Kennt Kim
-// Created: 2026-10-30 · Last updated: 2026-10-30
+// Created: 2026-10-30 · Last updated: 2026-10-31
 //
 // Purpose: a host's push registrations (Docs/design/08-PUSH.md §3.2): one file per device that
 // turned notifications on for this machine, holding the key this host signs with — made here, never
-// sent anywhere — the device's seal key for this host, its name for the host, its owners and the
-// events it wants; and beside each, what the keepers learned sending with it (a key the relay does
-// not know since when, given up on, when to try again).
+// sent anywhere — the device's seal key (one per device, the same on every host), its name for the
+// host, its owners and the events it wants; and beside each, what the keepers learned sending with
+// it (a key the relay does not know since when, given up on, when to try again).
 //
 // Notes:
 // - The folder is ~/.local/share/spectashell-push (SPECTASHELL_PUSH_DIR in tests), beside the
@@ -41,7 +41,7 @@ type Registration struct {
 	Relay   string   `json:"relay"`
 	KeyID   string   `json:"key_id"`
 	SignKey string   `json:"sign_key"` // the Ed25519 seed, base64: made here (Add)
-	SealKey string   `json:"seal_key"` // the device's X25519 public key for this host, base64
+	SealKey string   `json:"seal_key"` // the device's X25519 public key (one per device), base64
 	HostRef string   `json:"host_ref"`
 	Owners  []string `json:"owners,omitempty"`
 	Events  Events   `json:"events"`

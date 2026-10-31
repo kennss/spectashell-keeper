@@ -1,6 +1,6 @@
 # The keeper protocol
 
-> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-10-30
+> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-10-31
 >
 > Status: **version 1, forever.** It only grows: any later build must talk to a keeper an earlier
 > build started. Code: `engine/keeper/protocol.go` (the format), `keeper.go` (the keeper),
@@ -25,7 +25,7 @@ closes it:
 | `keeper_id` | Its id: 16 hexadecimal characters in sdTerm (a socket's path is at most 104 bytes on macOS) |
 | `path`, `argv`, `dir`, `env` | The program: what is executed, its arguments (`argv[0]` may be `-zsh`), its folder, its whole environment |
 | `columns`, `rows` | The terminal's size; 0 is 80 × 24 |
-| `meta` | What it remembers for the next client (§3) |
+| `meta` | What it remembers for the next client (§3); *(sdTerm, 2026-10-30)* the only place `started_by` is set |
 | `build` | *(sdTerm, 2026-10-23)* The keeper program's build, for its description |
 
 It answers one line on standard output — `ready`, or `error: <reason>` — then points its standard
@@ -123,6 +123,12 @@ a lease, sent as it connects and again before it runs out while its device is in
 a device suspended before it could say so, or one that lost its network while its socket stays open
 on the host, stops counting by itself. A connection that never sent Front — a client from before it
 — is not looking. A keeper from before Front skips the frame (§2) and tells no one.
+
+Whoever asks may ask about some devices only, by their `client_id`: the holder and the watchers
+count alike, each by the id it named with Who, and a holder that named none by `meta.client_id`.
+What the keeper tells — that a status became `blocked` or `done`, a program's notification with its
+title and body, a command's end with its command line and how long it ran — and to whom is the
+keeper program's, not the protocol's: SpectaShell's is in [the README](../README.md#notifications).
 
 The keeper's own emulator, which reads all the output as it comes (the preview's), keeps the time,
 so a command's length is known with no client there.
@@ -253,5 +259,6 @@ steps did not end another.
 | 2026-10-25 | sdTerm: `client_id` in Meta; `preview`, `full_screen` and `screen_title` in descriptions; a socket or description removed is made again |
 | 2026-10-26 | sdTerm: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
 | 2026-10-27 | sdTerm: `origin` in Meta |
-| 2026-10-30 | sdTerm: `arrangement` in Meta |
+| 2026-10-29 | sdTerm: `status` and `status_kind` in descriptions; a signal ends a keeper as Hangup does, its end `signalled` with `signal`; the event log (`<id>.log`), and `events` in a `lost` end; the agent link (`<id>.agent`, §5) |
+| 2026-10-30 | sdTerm: `arrangement` and `started_by` in Meta, `started_by` set only by the configuration |
 | 2026-10-30 | sdTerm: Front; `push` in descriptions and Hello |
