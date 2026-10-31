@@ -1,6 +1,6 @@
 // main_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-01
 //
 // Purpose: spectashell-keeper as the core drives it on a host (Docs/design/02-CONNECTIONS.md §3),
 // the real binary over pipes as over SSH exec channels: start prints a keeper's id and leaves it
@@ -50,7 +50,7 @@ func runtimeDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	dir := filepath.Join(base, "k")
-	t.Setenv("SDTERM_RUNTIME_DIR", dir)
+	t.Setenv("SPECTASHELL_RUNTIME_DIR", dir)
 	t.Cleanup(func() {
 		for _, d := range keeper.List(dir) {
 			if c, err := keeper.Dial(keeper.SocketPath(dir, d.KeeperID)); err == nil {

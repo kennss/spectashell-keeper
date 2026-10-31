@@ -1,6 +1,6 @@
 // main.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-01
 //
 // Purpose: spectashell-keeper, the program that holds a shell (Docs/design/02-CONNECTIONS.md §1,
 // 02-CONNECTIONS.md §3; the keeper itself is the engine's, engine/keeper). The Mac app carries it
@@ -50,7 +50,7 @@
 // Notes:
 // - build is set at link time (-ldflags "-X main.build=…") by scripts/build-keeper.sh.
 // - The keepers' folder is the engine's keeper.Place: /tmp/spectashell-<uid>/keepers on Linux,
-//   ~/Library/Application Support/SpectaShell/keepers on macOS, or SDTERM_RUNTIME_DIR; it must be
+//   ~/Library/Application Support/SpectaShell/keepers on macOS, or SPECTASHELL_RUNTIME_DIR; it must be
 //   the user's own, or nothing starts (02-CONNECTIONS.md §3).
 // - start prepares the program as the Mac app's core does for a local shell (termhost.Prepare):
 //   the login shell with the terminal's variables, LANG from the request, and shell integration,
@@ -61,7 +61,7 @@
 //   forwards an agent of its own (Docs/design/02-CONNECTIONS.md §3).
 // - start puts the new keeper's id in the shell's environment (SDTERM_KEEPER_ID), so a page command
 //   run in it, or in a program the shell started and its parents no longer lead to (a tmux server),
-//   finds its shell (pages/shell.go); and the keepers' folder, when SDTERM_RUNTIME_DIR put it
+//   finds its shell (pages/shell.go); and the keepers' folder, when SPECTASHELL_RUNTIME_DIR put it
 //   elsewhere, since the shell starts from its login session's variables only.
 // - boot is what changes when the host restarts (Linux's boot_id, the Mac's kern.boottime;
 //   host/hostboot), so the app can tell keepers that ended with a restart from keepers
@@ -100,7 +100,7 @@ type (
 var build = "dev"
 
 // place is where this host's keepers are.
-var place = keeper.Place{TempName: "spectashell", AppSupportName: "SpectaShell", Override: "SDTERM_RUNTIME_DIR"}
+var place = keeper.Place{TempName: "spectashell", AppSupportName: "SpectaShell", Override: "SPECTASHELL_RUNTIME_DIR"}
 
 func main() {
 	if len(os.Args) < 2 {

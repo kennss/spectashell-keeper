@@ -1,6 +1,6 @@
 # The keeper protocol
 
-> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-10-31
+> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-11-01
 >
 > Status: **version 1, forever.** It only grows: any later build must talk to a keeper an earlier
 > build started. Code: `engine/keeper/protocol.go` (the format), `keeper.go` (the keeper),
@@ -189,7 +189,7 @@ folder no longer leaves shells running out of every client's reach (02-CONNECTIO
 The folder and the one above it are created 0700 and checked with `lstat` before use: a real
 directory, not a symbolic link, owned by the user, with no group or other permission. On a shared
 server another user could create the folder first, or a link in its place; then no keeper starts
-and the client says why. An environment variable the application names (`SDTERM_RUNTIME_DIR` for
+and the client says why. An environment variable the application names (`SPECTASHELL_RUNTIME_DIR` for
 sdTerm) can name another folder.
 
 *(sdTerm, 2026-10-29.)* Beside a keeper's socket may be its agent link, `<id>.agent`: a symbolic
