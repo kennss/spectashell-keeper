@@ -1,6 +1,6 @@
 // termhost_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
 // Purpose: a terminal on a real keeper (this test binary re-run as `keep`): its frames show the
 // program's output and the replay after a reattach; a terminal whose keeper another client took
@@ -212,7 +212,10 @@ func TestATerminalTakenOverIsLostNotEnded(t *testing.T) {
 
 func TestPacingHoldsAtTwoUnappliedFrames(t *testing.T) {
 	dir := shortDir(t)
-	conn := startKeeper(t, dir, "p1", []string{"/bin/sh", "-c", "i=0; while [ $i -lt 400 ]; do echo line $i; i=$((i+1)); sleep 0.005; done; sleep 30"})
+	// A hundred lines take about 1.3 s (macOS's `sleep 0.005` sleeps some 12 ms), so the output goes
+	// on through the hold below and ends well inside waitFor's 5 s. Four hundred took 5 s, as long
+	// as the wait for the last line, which then failed when the machine was busy (2026-11-02).
+	conn := startKeeper(t, dir, "p1", []string{"/bin/sh", "-c", "i=0; while [ $i -lt 100 ]; do echo line $i; i=$((i+1)); sleep 0.005; done; sleep 30"})
 	v := newViews()
 	term, p := attach(conn, v)
 	defer term.Close()
@@ -225,7 +228,7 @@ func TestPacingHoldsAtTwoUnappliedFrames(t *testing.T) {
 	}
 	p.Ack(1)
 	waitFor(t, "a third frame after the ack", func() bool { return v.count() == 3 })
-	waitFor(t, "the last line", func() bool { ackAll(v, p); return strings.Contains(v.screen(), "line 399") })
+	waitFor(t, "the last line", func() bool { ackAll(v, p); return strings.Contains(v.screen(), "line 99") })
 }
 
 func TestPrepare(t *testing.T) {

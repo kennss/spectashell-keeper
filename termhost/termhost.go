@@ -1,6 +1,6 @@
 // termhost.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: one live terminal — a program reached through a Link (link.go), the emulator that models
 // its screen (package term), and the plumbing between them (Docs/design/01-DESIGN.md §3, §5).
@@ -21,6 +21,13 @@
 // - A resize changes the screen as output does, so it calls Config.OnChange too: a program that
 //   answers it with nothing (a shell at its prompt) left the views at the old size until its next
 //   output (2026-10-25).
+// - Resizes that come one after another are gathered (Resize, 2026-11-02): the first goes to the
+//   screen and the program at once, and the rest wait until none has come for resizeSettle, when
+//   the last is sent. A view that grows or shrinks over an animation — the iPad's side panel
+//   sliding in, a Mac window dragged larger — asked for a new size at each frame, twelve in a
+//   quarter of a second, and the program was told each one: Claude Code on a host redrew its whole
+//   conversation each time, 100 to 260 ms apiece. The screen keeps its size while they wait, as
+//   the program does, so the two never disagree; kitty waits the same way (resize_debounce_time).
 // - Goroutines: a reader feeds the link's output into the emulator and calls Config.OnChange,
 //   and reports the exit through Config.OnExit or the loss through Config.OnLost; a writer drains
 //   queued input (user input and the emulator's replies) to the link. The emulator is guarded by
@@ -62,6 +69,9 @@ import (
 )
 
 const maxPendingInput = 4 << 20
+
+// resizeSettle is how long resizes must stop for the last of them to be sent (see the file notes).
+const resizeSettle = 100 * time.Millisecond
 
 // Config is the owner's part of a terminal: how the emulator answers, and the callbacks.
 type Config struct {
@@ -130,6 +140,16 @@ type Terminal struct {
 	watching atomic.Bool
 	// viewCols and viewRows are the size the owner last asked for (Resize); 0 before it asked.
 	viewCols, viewRows int
+	// settling says a resize was sent less than resizeSettle ago, so the next ones wait; resizeGen
+	// counts the resizes asked for, so only the last one's wait sends.
+	settling  bool
+	resizeGen uint64
+	// toldCols and toldRows are the views' size last told to the keeper while watching.
+	toldCols, toldRows int
+	// ended says the owner closed or detached the terminal: a resize still waiting is dropped.
+	ended bool
+	// after runs f once d has passed (time.AfterFunc; a test's own clock in tests).
+	after func(d time.Duration, f func())
 
 	inMu      sync.Mutex
 	inCond    *sync.Cond
@@ -148,7 +168,8 @@ func Attach(link Link, info LinkInfo, cfg Config) *Terminal {
 		cols, rows = term.DefaultColumns, term.DefaultRows
 	}
 	t := &Terminal{link: link, info: info, replaying: true, meta: info.Meta, onChange: cfg.OnChange,
-		who: keeper.Who{Client: cfg.Client, ClientID: cfg.ClientID}}
+		who:   keeper.Who{Client: cfg.Client, ClientID: cfg.ClientID},
+		after: func(d time.Duration, f func()) { time.AfterFunc(d, f) }}
 	t.watching.Store(cfg.Watch)
 	if j, ok := link.(Joinable); ok {
 		_ = j.SayWho(t.who)
@@ -376,10 +397,8 @@ func (t *Terminal) present(p keeper.Present) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	was := t.watching.Swap(!p.Holding)
-	if was && p.Holding && validSize(t.viewCols, t.viewRows) &&
-		(t.viewCols != t.emu.Columns() || t.viewRows != t.emu.Rows()) {
-		t.emu.Resize(t.viewCols, t.viewRows)
-		_ = t.link.Resize(t.viewCols, t.viewRows)
+	if was && p.Holding && validSize(t.viewCols, t.viewRows) {
+		t.applyViewSize()
 	}
 }
 
@@ -475,27 +494,58 @@ func (t *Terminal) Input(in *pb.TerminalInput) {
 // Resize changes the pseudo-terminal's size (the program gets SIGWINCH) and the screen's, which
 // goes to the views at once (Config.OnChange), whether or not the program writes anything. A
 // watcher's only tells the keeper, for when it holds the keyboard; its screen keeps the program's.
+// A resize that follows another within resizeSettle waits, and only the last of a run is sent (see
+// the file notes).
 func (t *Terminal) Resize(cols, rows int) {
 	if !validSize(cols, rows) {
 		return
 	}
 	t.mu.Lock()
 	t.viewCols, t.viewRows = cols, rows
-	if t.watching.Load() {
-		_ = t.link.Resize(cols, rows)
+	t.resizeGen++
+	gen, waits := t.resizeGen, t.settling
+	t.settling = true
+	changed := !waits && t.applyViewSize()
+	t.mu.Unlock()
+	t.after(resizeSettle, func() { t.settled(gen) })
+	if changed && t.onChange != nil {
+		t.onChange()
+	}
+}
+
+// settled ends a run of resizes when gen is still the last: the size last asked for is sent, if
+// the first of the run did not already.
+func (t *Terminal) settled(gen uint64) {
+	t.mu.Lock()
+	if gen != t.resizeGen || t.ended {
 		t.mu.Unlock()
 		return
 	}
+	t.settling = false
+	changed := t.applyViewSize()
+	t.mu.Unlock()
+	if changed && t.onChange != nil {
+		t.onChange()
+	}
+}
+
+// applyViewSize gives the screen and the program the views' size, or tells it to the keeper while
+// watching; it says whether the screen changed. mu is held.
+func (t *Terminal) applyViewSize() bool {
+	cols, rows := t.viewCols, t.viewRows
+	if t.watching.Load() {
+		if cols != t.toldCols || rows != t.toldRows {
+			t.toldCols, t.toldRows = cols, rows
+			_ = t.link.Resize(cols, rows)
+		}
+		return false
+	}
 	if cols == t.emu.Columns() && rows == t.emu.Rows() {
-		t.mu.Unlock()
-		return
+		return false
 	}
 	t.emu.Resize(cols, rows)
 	_ = t.link.Resize(cols, rows)
-	t.mu.Unlock()
-	if t.onChange != nil {
-		t.onChange()
-	}
+	return true
 }
 
 // SetColors sets what the program's colour queries answer.
@@ -557,6 +607,7 @@ func (t *Terminal) SyncHeld() bool {
 
 // Close hangs up: the program's process group gets SIGHUP, and its keeper, if it has one, ends.
 func (t *Terminal) Close() {
+	t.end()
 	t.closeOnce.Do(func() {
 		t.stopInput()
 		t.link.Hangup(t.who)
@@ -565,10 +616,18 @@ func (t *Terminal) Close() {
 
 // Detach leaves the program to its keeper for the next attach; a link without a keeper ends it.
 func (t *Terminal) Detach() {
+	t.end()
 	t.closeOnce.Do(func() {
 		t.stopInput()
 		t.link.Close()
 	})
+}
+
+// end drops a resize still waiting: the owner is done with the terminal.
+func (t *Terminal) end() {
+	t.mu.Lock()
+	t.ended = true
+	t.mu.Unlock()
 }
 
 func (t *Terminal) stopInput() {
