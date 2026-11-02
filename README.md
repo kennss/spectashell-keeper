@@ -136,4 +136,9 @@ comment's path that starts `engine/` is a path here, and the comments and docume
 SpectaShell that are not published: its design (`Docs/design/01-DESIGN.md §…` and its parts, such
 as `Docs/design/02-CONNECTIONS.md §3`), the app's Go (`core/internal/…`) and Swift (`client/…`).
 Parts of the emulator and the keeper came from SiliconDesk, by the same author; their headers say
-which file.
+which file. SiliconDesk is not published either, so its documents the comments cite —
+`Docs/SDTERM-2.md`, `PROTOCOL.md`, `Docs/apps/sdterm.md` — cannot be opened from here.
+
+Those references record where a decision came from; nothing here needs them to be read. What the
+code does is in its comments and tests, and the keeper's protocol is written out here, in
+[Docs/KEEPER.md](Docs/KEEPER.md).

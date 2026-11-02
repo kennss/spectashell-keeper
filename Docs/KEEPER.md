@@ -139,7 +139,7 @@ What a keeper remembers for the next client, and describes itself with:
 
 | Key | Meaning |
 |---|---|
-| `owner` | The application that started it (`sdTerm`) |
+| `owner` | The application that started it: SpectaShell's apps give `sdTerm`, the name their code keeps, from before the product was named |
 | `persist` | It outlives its client by design (a terminal the user did not close) |
 | `title`, `directory` | The last title and folder the client saw (the keeper does not parse output) |
 | `restoration_id` | The client's name for the terminal's window, to put it back in the same place |

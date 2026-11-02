@@ -1,6 +1,6 @@
 // hostkeeper.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
 // Purpose: what spectashell-keeper's commands on a host read and print
 // (Docs/design/02-CONNECTIONS.md §3) — start a keeper for a terminal, list the keepers there with
@@ -56,7 +56,8 @@ type StartRequest struct {
 	Dir string `json:"dir,omitempty"`
 	// Env is added to the terminal's environment (LANG, TERM_PROGRAM_VERSION).
 	Env map[string]string `json:"env,omitempty"`
-	// TermProgram is TERM_PROGRAM ("sdTerm").
+	// TermProgram is TERM_PROGRAM, as the app gives it: SpectaShell's apps give "sdTerm", the name
+	// their code keeps, from before the product was named.
 	TermProgram string `json:"term_program,omitempty"`
 	// ShellIntegration injects the scripts into a login shell.
 	ShellIntegration bool `json:"shell_integration,omitempty"`

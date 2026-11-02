@@ -1,6 +1,6 @@
 // launch.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
 // Purpose: what a terminal's program is, before a keeper starts it: the user's login shell or a
 // command, its folder, and its environment with the terminal's variables and, for a login shell,
@@ -61,7 +61,8 @@ type Launch struct {
 	// Env is the environment it is started from: only its login session's variables are taken
 	// (TerminalEnv), whatever else the process starting it had.
 	Env []string
-	// TermProgram is TERM_PROGRAM's value: the application's name ("sdTerm").
+	// TermProgram is TERM_PROGRAM's value: the application's name, as it gives it (SpectaShell's
+	// apps give "sdTerm", the name their code keeps, from before the product was named).
 	TermProgram string
 	// Extra is added after the terminal's variables, so these win.
 	Extra map[string]string
