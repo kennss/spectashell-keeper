@@ -1,10 +1,10 @@
 // terminal.proto
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: the terminal engine's messages: opening a terminal, what happens in it (events), the
 // frames its views draw, and the input they send back (Docs/design/01-DESIGN.md §3.1, §3.2). They
-// are the engine's own; whoever uses the engine (sdTerm's app layer) wraps them in messages of its
+// are the engine's own; whoever uses the engine (SpectaShell's app) wraps them in messages of its
 // own.
 //
 // Notes:
@@ -647,9 +647,10 @@ type TerminalOpen struct {
 	// (Docs/KEEPER.md §2.1); TerminalTake takes the keyboard later. A keeper from a build before
 	// joining cannot be joined, and the open fails without taking it over.
 	Join bool `protobuf:"varint,12,opt,name=join,proto3" json:"join,omitempty"`
-	// With persist: the app's own name for where it opened the terminal from (sdTerm: the saved host
-	// it reached the keeper through), kept with it as given (Docs/KEEPER.md §3, `origin`) and handed
-	// back in KeptTerminal.origin. Ignored when adopting: whoever attaches later never changes it.
+	// With persist: the app's own name for where it opened the terminal from (SpectaShell: the saved
+	// host it reached the keeper through), kept with it as given (Docs/KEEPER.md §3, `origin`) and
+	// handed back in KeptTerminal.origin. Ignored when adopting: whoever attaches later never changes
+	// it.
 	Origin        string `protobuf:"bytes,13,opt,name=origin,proto3" json:"origin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -777,7 +778,7 @@ func (x *TerminalOpen) GetOrigin() string {
 }
 
 // A pattern the session looks for in each line a program finishes on the main screen
-// (PROTOCOL.md §7.10): sdterm's triggers ("CUDA out of memory", a Python traceback).
+// (PROTOCOL.md §7.10): SpectaShell's triggers ("CUDA out of memory", a Python traceback).
 type TerminalTrigger struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The app's name for it, given back in TerminalTriggered.
@@ -1364,8 +1365,8 @@ type TerminalWrite struct {
 	TerminalId uint64                 `protobuf:"varint,1,opt,name=terminal_id,json=terminalId,proto3" json:"terminal_id,omitempty"`
 	Data       []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	// Write it as a paste: bracketed when the program asked for bracketed paste (PROTOCOL.md §7.5),
-	// so a multi-line text reaches it as one paste, not as lines typed and run (sdterm's snippets).
-	// `data` must then be UTF-8.
+	// so a multi-line text reaches it as one paste, not as lines typed and run (SpectaShell's
+	// snippets). `data` must then be UTF-8.
 	Paste         bool `protobuf:"varint,3,opt,name=paste,proto3" json:"paste,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1827,10 +1828,10 @@ type TerminalInfo struct {
 	// on another machine. Empty: this one.
 	Remote string `protobuf:"bytes,5,opt,name=remote,proto3" json:"remote,omitempty"`
 	// (1.3) The process id of the program in front (the shell's at its prompt), on the host: an app
-	// that owns the terminal reads what that program keeps about itself (sdterm: a coding agent's
-	// session, to offer it again after a restart). 0: not known, or a peer before 1.3.
+	// that owns the terminal reads what that program keeps about itself (SpectaShell: a coding
+	// agent's session, to offer it again after a restart). 0: not known, or a peer before 1.3.
 	ProgramPid uint32 `protobuf:"varint,6,opt,name=program_pid,json=programPid,proto3" json:"program_pid,omitempty"`
-	// (sdTerm) The command that resumes the coding agent in front (Claude Code, Codex) after a
+	// (SpectaShell) The command that resumes the coding agent in front (Claude Code, Codex) after a
 	// restart, shell-quoted, to be typed at a new shell's prompt; empty for none.
 	Resume        string `protobuf:"bytes,7,opt,name=resume,proto3" json:"resume,omitempty"`
 	unknownFields protoimpl.UnknownFields

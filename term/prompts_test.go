@@ -1,6 +1,6 @@
 // prompts_test.go
 // Author: Kennt Kim
-// Created: 2026-10-19 · Last updated: 2026-10-29
+// Created: 2026-10-19 · Last updated: 2026-11-02
 //
 // Purpose: shell integration's marks (prompts.go) as bash with SiliconDesk's script prints them: a
 // prompt, the command typed (read from the screen), its output and end on the right lines, with
@@ -164,9 +164,9 @@ func TestShellIntegrationScreens(t *testing.T) {
 func TestRunningCommandsSurviveAReplay(t *testing.T) {
 	p := newPromptFixture(t, 10)
 	p.write("\x1b]133;A;aid=42\x07$ \x1b]133;B\x07python train.py\r\n")
-	p.write("\x1b]133;C;aid=42;sdterm_started=" + strconv.FormatInt(p.now.UnixMilli(), 10) + "\x07epoch 1\r\n")
+	p.write("\x1b]133;C;aid=42;spectashell_started=" + strconv.FormatInt(p.now.UnixMilli(), 10) + "\x07epoch 1\r\n")
 	modes := string(p.term.ModeSequences())
-	if !strings.Contains(modes, "\x1b]133;C;aid=42;cmdline_url=python%20train.py;sdterm_started=1000000\x07") {
+	if !strings.Contains(modes, "\x1b]133;C;aid=42;cmdline_url=python%20train.py;spectashell_started=1000000\x07") {
 		t.Fatalf("modes %q", modes)
 	}
 	// A fresh terminal, as after a session change: its clock knows nothing of the old output.
@@ -186,6 +186,21 @@ func TestRunningCommandsSurviveAReplay(t *testing.T) {
 	fresh.write("\x1b]133;D;2;aid=42\x07")
 	if f := fresh.finished[1]; f.HasDuration || f.ExitCode != 2 {
 		t.Fatalf("unknown start %+v", f)
+	}
+}
+
+// A shell whose integration SiliconDesk installed, or one started before the scripts took
+// SpectaShell's name, gives its command's start as sdterm_started; it is read the same.
+func TestTheEarlierStartOptionIsRead(t *testing.T) {
+	p := newPromptFixture(t, 10)
+	p.write("\x1b]133;A;aid=7\x07$ \x1b]133;B\x07make\r\n")
+	started := p.now.UnixMilli()
+	p.now = p.now.Add(10 * time.Minute) // C arrives late: the start is the shell's, not C's
+	p.write("\x1b]133;C;aid=7;sdterm_started=" + strconv.FormatInt(started, 10) + "\x07")
+	p.now = time.UnixMilli(started).Add(time.Hour)
+	p.write("\x1b]133;D;0;aid=7\x07")
+	if len(p.finished) != 1 || !p.finished[0].HasDuration || p.finished[0].Duration != time.Hour {
+		t.Fatalf("finished %+v, want make taking the hour since sdterm_started", p.finished)
 	}
 }
 

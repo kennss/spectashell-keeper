@@ -1,8 +1,8 @@
 // describe_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-30
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
-// Purpose: what sdTerm grew the keeper by (Docs/KEEPER.md): a client taken over is told so
+// Purpose: what SpectaShell grew the keeper by (Docs/KEEPER.md): a client taken over is told so
 // (ErrTakenOver) instead of seeing its connection simply end; List reads each keeper's
 // description without connecting — the client holding it keeps it — and drops descriptions whose
 // keeper is gone, and says who holds the keeper, whether a client is attached and how the
@@ -346,8 +346,8 @@ func TestTheKeepersFolderMustBeTheUsersOwn(t *testing.T) {
 	if err := EnsurePrivateDir(mine); err != nil {
 		t.Fatalf("a new private folder was refused: %v", err)
 	}
-	t.Setenv("SDTERM_TEST_KEEPERS", mine)
-	got, err := Place{TempName: "unused", AppSupportName: "unused", Override: "SDTERM_TEST_KEEPERS"}.Dir()
+	t.Setenv("SPECTASHELL_TEST_KEEPERS", mine)
+	got, err := Place{TempName: "unused", AppSupportName: "unused", Override: "SPECTASHELL_TEST_KEEPERS"}.Dir()
 	if err != nil || got != mine {
 		t.Fatalf("Place.Dir with the override = %q, %v", got, err)
 	}
@@ -402,7 +402,7 @@ func TestTheClientHearsWhatRunsInTheShell(t *testing.T) {
 // client of an earlier build sends Meta without it.
 func TestWhoStartedAKeeperIsKeptAsGiven(t *testing.T) {
 	dir := shortDir(t)
-	t.Setenv("SDTERM_KEEPER_HELPER", "1")
+	t.Setenv("SPECTASHELL_KEEPER_HELPER", "1")
 	starter := &Who{Client: "Sam's MacBook Pro", ClientID: "mac-1"}
 	c, err := Start([]string{os.Args[0]}, Config{
 		Socket: SocketPath(dir, "s1"), KeeperID: "s1", Path: "/bin/sh", Argv: []string{"/bin/sh"}, Dir: dir,

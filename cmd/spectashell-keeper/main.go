@@ -1,6 +1,6 @@
 // main.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-11-01
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
 // Purpose: spectashell-keeper, the program that holds a shell (Docs/design/02-CONNECTIONS.md §1,
 // 02-CONNECTIONS.md §3; the keeper itself is the engine's, engine/keeper). The Mac app carries it
@@ -59,10 +59,11 @@
 //   keeper's agent link, which `attach <id> --agent` points at the agent forwarded to its channel
 //   while it holds the keeper (keeper/agent.go): a kept shell outlives every connection, and each
 //   forwards an agent of its own (Docs/design/02-CONNECTIONS.md §3).
-// - start puts the new keeper's id in the shell's environment (SDTERM_KEEPER_ID), so a page command
-//   run in it, or in a program the shell started and its parents no longer lead to (a tmux server),
-//   finds its shell (pages/shell.go); and the keepers' folder, when SPECTASHELL_RUNTIME_DIR put it
-//   elsewhere, since the shell starts from its login session's variables only.
+// - start puts the new keeper's id in the shell's environment (SPECTASHELL_KEEPER_ID), so a page
+//   command run in it, or in a program the shell started and its parents no longer lead to (a tmux
+//   server), finds its shell (pages/shell.go); and the keepers' folder, when
+//   SPECTASHELL_RUNTIME_DIR put it elsewhere, since the shell starts from its login session's
+//   variables only.
 // - boot is what changes when the host restarts (Linux's boot_id, the Mac's kern.boottime;
 //   host/hostboot), so the app can tell keepers that ended with a restart from keepers
 //   that were closed (02-CONNECTIONS.md §3).

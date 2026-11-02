@@ -30,7 +30,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if os.Getenv("SDTERM_KEEPER_HELPER") == "1" {
+	if os.Getenv("SPECTASHELL_KEEPER_HELPER") == "1" {
 		os.Exit(keeper.Main())
 	}
 	os.Exit(m.Run())
@@ -49,7 +49,7 @@ func shortDir(t *testing.T) string {
 
 func startKeeper(t *testing.T, dir, id string, argv []string) *keeper.Conn {
 	t.Helper()
-	t.Setenv("SDTERM_KEEPER_HELPER", "1")
+	t.Setenv("SPECTASHELL_KEEPER_HELPER", "1")
 	prog, err := Prepare(Launch{Argv: argv, Dir: dir, Env: []string{"PATH=/usr/bin:/bin", "LANG=en_US.UTF-8"},
 		TermProgram: "test"})
 	if err != nil {
@@ -266,7 +266,7 @@ func TestPrepare(t *testing.T) {
 // A shell's end-of-line mark (zsh's PROMPT_SP: "%", spaces to the last column, a carriage return,
 // a space over the "%", another) written at 40 columns, and the screen narrowed after: attached
 // again, the replay draws the mark at 40 columns, where it erases itself, not at 20, where it would
-// wrap and leave the "%" above the prompt (2026-10-23, in sdTerm on the Mac).
+// wrap and leave the "%" above the prompt (2026-10-23, in SpectaShell on the Mac).
 func TestAReplayIsDrawnAtTheSizesItWasWrittenAt(t *testing.T) {
 	dir := shortDir(t)
 	conn := startKeeper(t, dir, "r1", []string{"/bin/sh", "-c", `printf '%%%39s\r \r> '; read x; sleep 30`})
@@ -299,7 +299,7 @@ func TestAReplayIsDrawnAtTheSizesItWasWrittenAt(t *testing.T) {
 // A resize the program answers with nothing (a shell at its prompt prints nothing on SIGWINCH)
 // still reaches the views: the screen changed size, so a frame of the new size goes out without
 // waiting for output. A pane split, or closed beside another, kept drawing at its old size until
-// the next output (2026-10-25, in sdTerm on the Mac: "84 × 53" in a pane 170 columns wide).
+// the next output (2026-10-25, in SpectaShell on the Mac: "84 × 53" in a pane 170 columns wide).
 func TestAResizeIsSentWithoutOutput(t *testing.T) {
 	dir := shortDir(t)
 	conn := startKeeper(t, dir, "z1", []string{"/bin/sh", "-c", `printf '> '; read x`})
@@ -500,14 +500,14 @@ func TestTerminalEnvLetsExtraWinAndNamesEachVariableOnce(t *testing.T) {
 			"CLAUDE_CODE_CHILD_SESSION=1", "CLAUDECODE=1", "TERM_PROGRAM=iTerm.app", "TERM_PROGRAM_VERSION=3.5",
 			"ITERM_SESSION_ID=w0", "TERM_SESSION_ID=x", "LC_TERMINAL=iTerm2", "TMUX=/tmp/t,1,0", "TMUX_PANE=%1",
 			"STY=1.pts", "CMUX_WORKSPACE_ID=w", "XPC_SERVICE_NAME=0", "__CFBundleIdentifier=ai.calidalab.sdterm",
-			"DYLD_FRAMEWORK_PATH=/x", "SDTERM_TEST=1", "SSH_CONNECTION=1 2 3 4"}, nil,
+			"DYLD_FRAMEWORK_PATH=/x", "SPECTASHELL_TEST=1", "SSH_CONNECTION=1 2 3 4"}, nil,
 			map[string]string{"HOME": "/Users/x", "USER": "x", "LOGNAME": "x", "SHELL": "/bin/zsh",
 				"PATH": "/usr/bin:/bin", "TMPDIR": "/tmp/x/", "LC_ALL": "en_US.UTF-8", "SSH_AUTH_SOCK": "/tmp/agent",
 				"XDG_RUNTIME_DIR": "/run/user/1000", "__CF_USER_TEXT_ENCODING": "0x1F6:0x0:0x0",
 				"TERM_PROGRAM": "sdTerm", "TERM_PROGRAM_VERSION": "", "CLAUDE_CODE_CHILD_SESSION": "", "CLAUDECODE": "",
 				"ITERM_SESSION_ID": "", "TERM_SESSION_ID": "", "LC_TERMINAL": "", "TMUX": "", "TMUX_PANE": "",
 				"STY": "", "CMUX_WORKSPACE_ID": "", "XPC_SERVICE_NAME": "", "__CFBundleIdentifier": "",
-				"DYLD_FRAMEWORK_PATH": "", "SDTERM_TEST": "", "SSH_CONNECTION": ""}},
+				"DYLD_FRAMEWORK_PATH": "", "SPECTASHELL_TEST": "", "SSH_CONNECTION": ""}},
 	}
 	for _, c := range cases {
 		env := TerminalEnv(c.env, "sdTerm", c.extra)

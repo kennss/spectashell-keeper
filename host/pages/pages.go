@@ -1,6 +1,6 @@
 // pages.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-30
+// Created: 2026-10-25 · Last updated: 2026-11-02
 //
 // Purpose: a coding agent's commands to the page beside its shell (Docs/design/05-WINDOWS.md §3):
 // what a command and its reply are, where a device's socket for them is, and asking one. The agent
@@ -13,10 +13,13 @@
 // - A socket takes one request: the asker writes a Request as JSON, reads one Reply and closes.
 // - A device's socket is named by a digest of its id (DeviceSocket), so the id itself, which
 //   tells the device apart from others of its name, is not spread over hosts' folders as names,
-//   and the name stays short: a Unix socket's path is at most 104 bytes on macOS.
+//   and the name stays short: a Unix socket's path is at most 104 bytes on macOS. The digest's
+//   prefix keeps the product's first name, "sdTerm pages device": the app names the socket its
+//   relay listens on and a host's page command names the one it asks, each from its own build,
+//   so a new prefix would part a new app from a host's older keeper.
 // - The folder is `pages` in the keepers' folder (keeper.Place), made and checked as private as
 //   it (keeper.EnsurePrivateDir): anyone who reaches a device's socket drives its pages.
-// - Args are PageAgent.js's arguments (client/sdTerm/Shared), passed to the app as they are.
+// - Args are the arguments of SpectaShell's PageAgent.js, passed to the app as they are.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
 //   (Docs/design/01-DESIGN.md §3.2).
 

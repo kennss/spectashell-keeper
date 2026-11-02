@@ -1,6 +1,6 @@
 // keeper.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: the keeper process (`spectashell-keeper keep`, Docs/KEEPER.md): it holds one terminal
 // program on its pseudo-terminal, keeps the program's recent output, and serves its clients over
@@ -8,13 +8,13 @@
 // outlives the client that started it.
 //
 // Notes:
-// - Taken from SiliconDesk's host/internal/keeper/keeper.go on 2026-10-23. Grown in sdTerm: the
-//   description beside the socket (describe), TakenOver before a connection is closed for another,
-//   and refreshing the times of the socket, the description and their folders (refreshTimes), which
-//   SiliconDesk's session did and here no session does (Docs/design/02-CONNECTIONS.md §3); and what
-//   runs in the shell (watchInfo, the engine's paneinfo), read here beside the shell — on whichever
-//   machine it is — every infoEvery while a client is connected, and sent as Info when it changed
-//   and to every client that connects.
+// - Taken from SiliconDesk's host/internal/keeper/keeper.go on 2026-10-23. Grown in SpectaShell:
+//   the description beside the socket (describe), TakenOver before a connection is closed for
+//   another, and refreshing the times of the socket, the description and their folders
+//   (refreshTimes), which SiliconDesk's session did and here no session does
+//   (Docs/design/02-CONNECTIONS.md §3); and what runs in the shell (watchInfo, the engine's
+//   paneinfo), read here beside the shell — on whichever machine it is — every infoEvery while a
+//   client is connected, and sent as Info when it changed and to every client that connects.
 // - A keeper whose socket or description was removed while it runs makes them again (stayReachable):
 //   every reachableEvery, and at once on SIGUSR1, as tmux does with its socket. Without its socket
 //   no client can reach it again, though it and its program run on. A Mac app cleaner removed the

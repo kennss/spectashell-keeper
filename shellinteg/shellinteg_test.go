@@ -1,15 +1,15 @@
 // shellinteg_test.go
 // Author: Kennt Kim
-// Created: 2026-10-19 · Last updated: 2026-10-29
+// Created: 2026-10-19 · Last updated: 2026-11-02
 //
-// Purpose: shell integration with the real shells of the machine (Docs/SDTERM-2.md §4.4): bash
-// (4.4 or later), zsh and fish, each started as the session starts it, on a pseudo-terminal read by
-// the emulator. The user's startup files still run (an alias from them works); each command ends
-// with its command line and exit status; Ctrl-C at the prompt is no command (pressed again when bash
-// lost the first); the user's own
-// PROMPT_COMMAND still sees $?; bash's HISTFILE is ~/.bash_history and not exported; the variables
-// that loaded the scripts are gone; zsh with no startup files is left alone. A shell that is
-// missing (or a bash too old for marks: macOS's 3.2) is skipped.
+// Purpose: shell integration with the real shells of the machine (SiliconDesk's Docs/SDTERM-2.md
+// §4.4): bash (4.4 or later), zsh and fish, each started as the session starts it, on a
+// pseudo-terminal read by the emulator. The user's startup files still run (an alias from them
+// works); each command ends with its command line and exit status; Ctrl-C at the prompt is no
+// command (pressed again when bash lost the first); the user's own PROMPT_COMMAND still sees $?;
+// bash's HISTFILE is ~/.bash_history and not exported; the variables that loaded the scripts are
+// gone; zsh with no startup files is left alone. A shell that is missing (or a bash too old for
+// marks: macOS's 3.2) is skipped.
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/shellinteg/shellinteg_test.go on 2026-10-23.
@@ -75,7 +75,7 @@ func startShellAs(t *testing.T, path string, files map[string]string, inject boo
 			t.Fatalf("%s got no integration", path)
 		}
 	} else {
-		env = append(env, "SDTERM_TEST_DIR="+dir)
+		env = append(env, "SPECTASHELL_TEST_DIR="+dir)
 	}
 	cmd := exec.Command(path)
 	cmd.Args, cmd.Env, cmd.Dir = argv, env, home
@@ -259,9 +259,9 @@ func TestBash(t *testing.T) {
 	})
 	exercise(t, r)
 	r.until("$? handed on", func() bool { return strings.Contains(r.output(), "rc saw 1") })
-	r.run(`echo "hist=$HISTFILE env=[$ENV] exported=$(env | grep -c -e ^HISTFILE= -e ^SDTERM_)"`)
+	r.run(`echo "hist=$HISTFILE env=[$ENV] exported=$(env | grep -c -e ^HISTFILE= -e ^SPECTASHELL_)"`)
 	r.until("the variables", func() bool { return strings.Contains(r.output(), "/.bash_history env=[] exported=0") })
-	if !strings.Contains(r.output(), "sdterm_started=") {
+	if !strings.Contains(r.output(), "spectashell_started=") {
 		t.Fatal("C without the start")
 	}
 }
@@ -282,7 +282,7 @@ func TestBashOnAnotherHost(t *testing.T) {
 	r := startShellAs(t, path, map[string]string{
 		".profile": "echo profile-read\n. ~/.bashrc\n",
 		".bashrc": "PS1='READY> '\nalias ll='echo aliased!'\n" +
-			`[ -r "$SDTERM_TEST_DIR/bash/sdterm.bash" ] && . "$SDTERM_TEST_DIR/bash/sdterm.bash"` + "\n",
+			`[ -r "$SPECTASHELL_TEST_DIR/bash/spectashell.bash" ] && . "$SPECTASHELL_TEST_DIR/bash/spectashell.bash"` + "\n",
 	}, false)
 	exercise(t, r)
 	r.mu.Lock()
@@ -301,9 +301,9 @@ func TestZsh(t *testing.T) {
 		".zshrc": "PROMPT='READY> '\nalias ll='echo aliased!'\nunsetopt PROMPT_SP\n",
 	})
 	exercise(t, r)
-	r.run(`echo "zdotdir=[$ZDOTDIR] exported=$(env | grep -c -e ^SDTERM_)"`)
+	r.run(`echo "zdotdir=[$ZDOTDIR] exported=$(env | grep -c -e ^SPECTASHELL_)"`)
 	r.until("the variables", func() bool { return strings.Contains(r.output(), "zdotdir=[] exported=0") })
-	if !strings.Contains(r.output(), "cmdline_url=ll") || !strings.Contains(r.output(), "sdterm_started=") {
+	if !strings.Contains(r.output(), "cmdline_url=ll") || !strings.Contains(r.output(), "spectashell_started=") {
 		t.Fatal("C without the command line or the start")
 	}
 }
@@ -331,6 +331,6 @@ func TestFish(t *testing.T) {
 		".config/fish/config.fish": "function fish_prompt; echo -n 'READY> '; end\nalias ll 'echo aliased!'\n",
 	})
 	exercise(t, r)
-	r.run(`echo "dirs=[$XDG_DATA_DIRS] exported=(env | grep -c -e ^SDTERM_)"`)
+	r.run(`echo "dirs=[$XDG_DATA_DIRS] exported=(env | grep -c -e ^SPECTASHELL_)"`)
 	r.until("the variables", func() bool { return strings.Contains(r.output(), "dirs=[] exported=0") })
 }

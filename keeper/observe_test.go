@@ -1,6 +1,6 @@
 // observe_test.go
 // Author: Kennt Kim
-// Created: 2026-10-30 · Last updated: 2026-10-30
+// Created: 2026-10-30 · Last updated: 2026-11-02
 //
 // Purpose: what a keeper notices for a user who is away (observe.go): a status becoming blocked —
 // with why — or done, not again while it stays; a command that ran, timed by the keeper's own clock
@@ -76,7 +76,7 @@ func observedKeeper(t *testing.T, id string) (*Conn, string, string) {
 	t.Helper()
 	dir := shortDir(t)
 	notices := filepath.Join(dir, "notices")
-	t.Setenv("SDTERM_KEEPER_NOTICES", notices)
+	t.Setenv("SPECTASHELL_KEEPER_NOTICES", notices)
 	c := startKeeper(t, dir, id, []string{"/bin/sh"})
 	r := record(c)
 	r.wait(t, "the replay", func(_ string, replayEnd int, _ *Exit) bool { return replayEnd >= 0 })

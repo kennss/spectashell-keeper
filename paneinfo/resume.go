@@ -1,6 +1,6 @@
 // resume.go
 // Author: Kennt Kim
-// Created: 2026-10-22 · Last updated: 2026-10-30
+// Created: 2026-10-22 · Last updated: 2026-11-02
 //
 // Purpose: the shell command that resumes the conversation of the coding agent running in front of
 // a terminal — Claude Code or Codex — so that after a restart of the machine, which no shell
@@ -12,7 +12,7 @@
 //   (resumeCommand, claudeSession, codexSession, withoutInterpreter, claudeOptions, codexOptions,
 //   resumeArgs, shellJoin, shellQuote); the rest of that file is SiliconDesk's sdterm app. There
 //   the variables of a program another app asked to run (sdLLM's RunCommand environment) went
-//   before the command; sdTerm runs no such programs, so the command is the program's own.
+//   before the command; SpectaShell runs no such programs, so the command is the program's own.
 // - The program in front's process group is looked at — its leader and what it started in the
 //   group: `ollama launch claude` runs claude as its child. *Bug fixed (2026-10-23):* SiliconDesk
 //   looked at the group whose id is the program's process id, which is empty when the group's

@@ -1,6 +1,6 @@
 // protocol.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: the keeper protocol (Docs/KEEPER.md) — how a client talks to the keeper process that
 // holds a terminal program. It is version 1 forever: any later build must be able to talk to a
@@ -8,32 +8,34 @@
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/keeper/protocol.go on 2026-10-23; the wire format is
-//   SiliconDesk's, unchanged, so the two speak the same protocol. Grown in sdTerm (2026-10-23):
-//   TakenOver (keeper -> client), and the description each keeper writes beside its socket
-//   (Description). Where these notes say "session", read the client.
+//   SiliconDesk's, unchanged, so the two speak the same protocol. Grown in SpectaShell
+//   (2026-10-23): TakenOver (keeper -> client), and the description each keeper writes beside its
+//   socket (Description). Where these notes say "session", read the client.
 // - A frame is a 4-byte big-endian length (of what follows), a 1-byte type and the payload.
 // - Keeper -> session: Hello (JSON), Output (bytes) — first the kept output, then ReplayEnd, then
 //   live output — and Exit (JSON) once the program ended; TakenOver (empty) just before the keeper
 //   closes a connection because another client connected, so the first knows its program still
-//   runs. A client from before TakenOver skips it and sees the connection end. Info (JSON, sdTerm,
-//   2026-10-23): what runs in the shell (paneinfo), after the replay and whenever it changes.
-//   Size (2 + 2 bytes, columns and rows, sdTerm, 2026-10-23): in the replay, before each stretch
-//   of kept output, the terminal's size it was written at; the last one is the size now. A client
-//   from before Size skips it and draws the whole replay at one size, as it always did.
+//   runs. A client from before TakenOver skips it and sees the connection end. Info (JSON,
+//   SpectaShell, 2026-10-23): what runs in the shell (paneinfo), after the replay and whenever it
+//   changes. Size (2 + 2 bytes, columns and rows, SpectaShell, 2026-10-23): in the replay, before
+//   each stretch of kept output, the terminal's size it was written at; the last one is the size
+//   now. A client from before Size skips it and draws the whole replay at one size, as it always
+//   did.
 // - Session -> keeper: Input (bytes), Resize (2 + 2 bytes, columns and rows), Meta (JSON, what the
 //   keeper remembers for the next session: owner, persist, title, directory, restoration id, the
-//   origin its starting client gave it, its arrangement among others, and for a web app's server its port and token), Hangup, and Stop (added 2026-10-19 for web apps'
-//   servers: SIGTERM, SIGKILL after stopGrace, then the keeper ends). Hangup carries the client
-//   that hangs up (Who, JSON, sdTerm, 2026-10-26); a keeper from before reads none, and one hung
-//   up by an earlier client gets an empty payload and names no one.
-// - The end beside the socket (End, <id>.end, sdTerm, 2026-10-26): how a keeper ended — closed by
-//   which client, stopped, left after its program ended, or found gone — written as it ends, since
-//   its description goes with it, so a device that held the shell can say what became of it.
+//   origin its starting client gave it, its arrangement among others, and for a web app's server
+//   its port and token), Hangup, and Stop (added 2026-10-19 for web apps' servers: SIGTERM, SIGKILL
+//   after stopGrace, then the keeper ends). Hangup carries the client that hangs up (Who, JSON,
+//   SpectaShell, 2026-10-26); a keeper from before reads none, and one hung up by an earlier client
+//   gets an empty payload and names no one.
+// - The end beside the socket (End, <id>.end, SpectaShell, 2026-10-26): how a keeper ended — closed
+//   by which client, stopped, left after its program ended, or found gone — written as it ends,
+//   since its description goes with it, so a device that held the shell can say what became of it.
 // - A keeper may hold a terminal program or a web app's server (Docs/apps/webapps.md §2.4): one
 //   with Meta.Server set is a server, which no terminal adopts.
-// - Joining (sdTerm, 2026-10-26; Docs/design/07-TEAMS.md §1): a keeper also listens on a second
-//   socket beside the first (JoinPath, `<id>.join`), and a connection there watches instead of
-//   taking the keeper over. Of all the keeper's connections one at most holds the keyboard — its
+// - Joining (SpectaShell, 2026-10-26; Docs/design/07-TEAMS.md §1): a keeper also listens on a
+//   second socket beside the first (JoinPath, `<id>.join`), and a connection there watches instead
+//   of taking the keeper over. Of all the keeper's connections one at most holds the keyboard — its
 //   Input reaches the program and its Resize sizes the terminal — and the others watch: they get
 //   the output, the exit and Info as the holder does, and Size whenever the terminal's size
 //   changes, also after the replay; their Input, Meta and Stop are ignored, their Hangup only
@@ -95,7 +97,7 @@ type Hello struct {
 	// Set when the program has ended (its Exit follows the replay too).
 	Exited bool `json:"exited"`
 	// Push is the description's (Description.Push), so a client attaching knows at once whether
-	// its Front matters; sdTerm's, added 2026-10-30, absent from earlier keepers.
+	// its Front matters; SpectaShell's, added 2026-10-30, absent from earlier keepers.
 	Push bool `json:"push,omitempty"`
 }
 
@@ -114,22 +116,22 @@ type Meta struct {
 	// 2026-10-19): what the next session needs to reach it.
 	Server *Server `json:"server,omitempty"`
 	// Client names the device that attached last ("Sam's MacBook Pro"), as it told the keeper
-	// (sdTerm, added 2026-10-23); Description.Attached says whether it still is.
+	// (SpectaShell, added 2026-10-23); Description.Attached says whether it still is.
 	Client string `json:"client,omitempty"`
-	// ClientID tells that device apart from others of the same name (sdTerm, added 2026-10-25):
-	// two iPads both say "iPad", since iPadOS gives an app no other name for its device, and each
-	// took a shell the other held for its own.
+	// ClientID tells that device apart from others of the same name (SpectaShell, added
+	// 2026-10-25): two iPads both say "iPad", since iPadOS gives an app no other name for its
+	// device, and each took a shell the other held for its own.
 	ClientID string `json:"client_id,omitempty"`
-	// Origin is the starting client's own name for where it started the program from (sdTerm:
+	// Origin is the starting client's own name for where it started the program from (SpectaShell:
 	// the saved host it reached the keeper through; added 2026-10-27), kept as it was given:
 	// whoever attaches later, by whatever address, never changes it, so every client names the
 	// terminal alike — two saved hosts of one machine each listed its keepers under its own name.
 	Origin string `json:"origin,omitempty"`
-	// Arrangement is the client's description of where the terminal sits among others (sdTerm: the
-	// desk it is in, as JSON; added 2026-10-30), kept as given and read only by clients. A client
-	// watching never sets it, as it sets nothing of Meta.
+	// Arrangement is the client's description of where the terminal sits among others (SpectaShell:
+	// the desk it is in, as JSON; added 2026-10-30), kept as given and read only by clients. A
+	// client watching never sets it, as it sets nothing of Meta.
 	Arrangement string `json:"arrangement,omitempty"`
-	// StartedBy is the client that started the program, as it names itself (sdTerm, added
+	// StartedBy is the client that started the program, as it names itself (SpectaShell, added
 	// 2026-10-30), given in the keeper's Config and kept by the keeper itself: a client's Meta
 	// never changes it, so a client of an earlier build, which knows no such key, cannot drop it.
 	// A client closing a terminal another device started leaves it to its keeper rather than
@@ -188,7 +190,7 @@ type End struct {
 	Events []string `json:"events,omitempty"`
 }
 
-// Present is who is connected to a keeper (sdTerm, 2026-10-26): sent to every connection that
+// Present is who is connected to a keeper (SpectaShell, 2026-10-26): sent to every connection that
 // joined or said Who, whenever it changes.
 type Present struct {
 	// Holding says this connection holds the keyboard.
@@ -225,25 +227,25 @@ type Description struct {
 	Exit     *Exit `json:"exit,omitempty"`
 	// Preview is the last lines of the terminal's screen, at most previewLines, its blank ones at
 	// the bottom left out and each line's trailing spaces, as the keeper's own emulator draws the
-	// output (sdTerm, added 2026-10-25; absent from earlier keepers): what a device that has not
-	// opened the shell shows of it.
+	// output (SpectaShell, added 2026-10-25; absent from earlier keepers): what a device that has
+	// not opened the shell shows of it.
 	Preview []string `json:"preview,omitempty"`
 	// FullScreen says the program draws its whole screen (the alternate screen: an editor, top, an
 	// agent's interface), so Preview is a piece of that interface rather than output; ScreenTitle
-	// is the title the program set (OSC 0 or 2: Claude Code's names its task). Both sdTerm's,
+	// is the title the program set (OSC 0 or 2: Claude Code's names its task). Both SpectaShell's,
 	// added 2026-10-25; absent from earlier keepers.
 	FullScreen  bool   `json:"full_screen,omitempty"`
 	ScreenTitle string `json:"screen_title,omitempty"`
 	// Status is what the program says it is doing, as the keeper's emulator reads its OSC 7501
 	// records: its most pressing state ("blocked", "error", "working", "done", "idle") and, with
-	// blocked, why ("permission", "question", "auth"). sdTerm's, added 2026-10-29; absent while the
-	// program says nothing, and from earlier keepers. A device that has not opened the shell knows
-	// from it that the shell waits for the user.
+	// blocked, why ("permission", "question", "auth"). SpectaShell's, added 2026-10-29; absent
+	// while the program says nothing, and from earlier keepers. A device that has not opened the
+	// shell knows from it that the shell waits for the user.
 	Status     string `json:"status,omitempty"`
 	StatusKind string `json:"status_kind,omitempty"`
-	// Watchers are the connections watching the terminal, as they named themselves (sdTerm, added
-	// 2026-10-26; absent while none does, and from earlier keepers). Attached and Meta.Client stay
-	// the holder's.
+	// Watchers are the connections watching the terminal, as they named themselves (SpectaShell,
+	// added 2026-10-26; absent while none does, and from earlier keepers). Attached and Meta.Client
+	// stay the holder's.
 	Watchers []Who `json:"watchers,omitempty"`
 	// Push says the keeper program tells a user who is away what the program needs (SpectaShell's
 	// push, Docs/design/08-PUSH.md §4.5): its connections' Front matters. Absent from earlier

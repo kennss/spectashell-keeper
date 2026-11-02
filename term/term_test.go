@@ -1,6 +1,6 @@
 // term_test.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-29
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: tests of the terminal emulator — printing (wide, combining, wrapping), cursor and
 // erase sequences, scrolling into the history, the alternate screen, SGR, replies, OSC, resizing,
@@ -282,14 +282,14 @@ func TestSGR(t *testing.T) {
 // XTVERSION answers with the name the engine's user gave, and the engine's own without one.
 func TestXTVersionNamesTheTerminal(t *testing.T) {
 	f := newFixture(t, 10, 5).write("\x1b[>q")
-	if len(f.replies) != 1 || f.replies[0] != "\x1bP>|sdterm\x1b\\" {
+	if len(f.replies) != 1 || f.replies[0] != "\x1bP>|spectashell\x1b\\" {
 		t.Fatalf("unnamed reply = %q", f.replies)
 	}
 	var got []string
-	named := New(Options{Columns: 10, Rows: 5, Name: "sdTerm 1.0",
+	named := New(Options{Columns: 10, Rows: 5, Name: "SpectaShell 1.0",
 		Reply: func(b []byte) { got = append(got, string(b)) }})
 	named.Write([]byte("\x1b[>q"))
-	if len(got) != 1 || got[0] != "\x1bP>|sdTerm 1.0\x1b\\" {
+	if len(got) != 1 || got[0] != "\x1bP>|SpectaShell 1.0\x1b\\" {
 		t.Fatalf("named reply = %q", got)
 	}
 }

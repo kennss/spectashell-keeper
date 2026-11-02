@@ -1,17 +1,19 @@
 // shell.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-30
+// Created: 2026-10-25 · Last updated: 2026-11-02
 //
 // Purpose: the shell an agent's page command runs in (Docs/design/05-WINDOWS.md §3): the keeper
 // holding it, and the socket of the device that holds that keeper now. A command acts on the pages
 // beside its own shell only, so it must know which shell that is.
 //
 // Notes:
-// - SDTERM_KEEPER_ID names the keeper in shells started from 2026-10-25 (KeeperVariable), and
+// - SPECTASHELL_KEEPER_ID names the keeper in shells started from 2026-11-02 (KeeperVariable), and
 //   follows the shell's programs where its parents do not: a tmux server started in the shell is
-//   a child of init. Keepers started before set nothing; for them, and when the variable names no
-//   keeper running here, the command's parent processes are followed up to a keeper's shell
-//   (Description.PID) or the keeper itself (KeeperPID).
+//   a child of init. Shells started from 2026-10-25 to then have SDTERM_KEEPER_ID instead
+//   (earlierKeeperVariable), read as well: a keeper's shell outlives the build that started it.
+//   Keepers started before set neither; for them, and when the variable names no keeper running
+//   here, the command's parent processes are followed up to a keeper's shell (Description.PID) or
+//   the keeper itself (KeeperPID).
 // - The keeper's description says which device attached to it last (Meta.ClientID) and whether
 //   one is attached now; a shell no device holds has no page to use.
 // - Moved here from core/internal/pages on 2026-10-29, with the keeper program
@@ -28,7 +30,10 @@ import (
 )
 
 // KeeperVariable is the variable that names a shell's keeper in its environment.
-const KeeperVariable = "SDTERM_KEEPER_ID"
+const KeeperVariable = "SPECTASHELL_KEEPER_ID"
+
+// earlierKeeperVariable is KeeperVariable's name in shells started before 2026-11-02.
+const earlierKeeperVariable = "SDTERM_KEEPER_ID"
 
 // maxParents is how far up the parent processes are followed.
 const maxParents = 64
@@ -50,9 +55,11 @@ func Own(dir string, getenv func(string) string, pid int, parent func(int) int) 
 		byPID[d.PID] = d
 		byPID[d.KeeperPID] = d
 	}
-	if id := getenv(KeeperVariable); keeper.ValidID(id) {
-		if d, ok := running[id]; ok {
-			return d, nil
+	for _, name := range []string{KeeperVariable, earlierKeeperVariable} {
+		if id := getenv(name); keeper.ValidID(id) {
+			if d, ok := running[id]; ok {
+				return d, nil
+			}
 		}
 	}
 	for p, steps := pid, 0; p > 1 && steps < maxParents; p, steps = parent(p), steps+1 {

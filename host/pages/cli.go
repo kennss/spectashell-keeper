@@ -1,6 +1,6 @@
 // cli.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-30
+// Created: 2026-10-25 · Last updated: 2026-11-02
 //
 // Purpose: `spectashell-keeper page <command>`, an agent's command to the page beside its shell
 // (Docs/design/05-WINDOWS.md §3), for any agent that runs commands: its arguments read into a
@@ -8,7 +8,7 @@
 //
 // Notes:
 // - A target is a ref from a snapshot (e12), else a CSS selector; --text names an element by what
-//   it says. PageAgent.js (client/sdTerm/Shared) takes them as {ref}, {selector} or {text}.
+//   it says. SpectaShell's PageAgent.js takes them as {ref}, {selector} or {text}.
 // - --port picks the page by its port on the shell's machine; without it, the page last used.
 // - A screenshot goes to --out, else to a new file in the temporary folder, and its path is
 //   printed: an agent reads the picture from the file.

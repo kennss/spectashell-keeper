@@ -1,12 +1,12 @@
 // prompts.go
 // Author: Kennt Kim
-// Created: 2026-10-19 · Last updated: 2026-10-23
+// Created: 2026-10-19 · Last updated: 2026-11-02
 //
-// Purpose: shell integration (Docs/SDTERM-2.md §4, PROTOCOL.md §7.7): the semantic prompt marks
-// a shell prints — OSC 133 A (a prompt), B (the command line typed after it), C (the command runs:
-// its output starts), D;exit (it ended) — and VS Code's OSC 633 forms of the same. They become
-// marks on the lines where each begins (Line.Mark), for the device to jump between prompts and
-// copy a command's output, and a CommandFinished for each command that ends.
+// Purpose: shell integration (SiliconDesk's Docs/SDTERM-2.md §4, PROTOCOL.md §7.7): the semantic
+// prompt marks a shell prints — OSC 133 A (a prompt), B (the command line typed after it), C (the
+// command runs: its output starts), D;exit (it ended) — and VS Code's OSC 633 forms of the same.
+// They become marks on the lines where each begins (Line.Mark), for the device to jump between
+// prompts and copy a command's output, and a CommandFinished for each command that ends.
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/term/prompts.go on 2026-10-23.
@@ -23,10 +23,13 @@
 //   terminal shows it, and a command's end carries the column its output stopped at instead.
 // - The command line is, first, what the shell said: kitty's `cmdline_url=` (percent-encoded) on C,
 //   or VS Code's 633;E; else the screen text between B and C (iTerm2's rule).
-// - A command's start is the C's `sdterm_started=<unix ms>` when the shell gave it (SiliconDesk's
-//   own scripts do), else the time C arrived (Options.Now). Now returns the zero time when the time
-//   is not the output's own — a replay after a session change, a keeper's follower reading output
-//   it lets go — and a duration is then unknown rather than wrong.
+// - A command's start is the C's `spectashell_started=<unix ms>` when the shell gave it (the
+//   engine's own scripts do, shellinteg), else the time C arrived (Options.Now). Now returns the
+//   zero time when the time is not the output's own — a replay after a session change, a keeper's
+//   follower reading output it lets go — and a duration is then unknown rather than wrong.
+//   `sdterm_started` is read the same: SiliconDesk's scripts send it, on the hosts where it
+//   installed them, as did the engine's own until they took SpectaShell's name (2026-11-02), and a
+//   shell keeps the script it started with.
 // - Marks are set on the main screen only; the alternate screen has none. A line's mark is
 //   replaced, never changed in place, since a history line shares it.
 // - ModeSequences re-emits each running command as a C with its aid, command line and start, so a
@@ -334,8 +337,11 @@ func (t *Terminal) outputStart(opts map[string]string) {
 		e.command = commandLine(t.mainText(e.inputLine, e.inputCol, t.absLine(t.cy), t.cx))
 	}
 	e.started = t.now()
-	if ms, err := strconv.ParseInt(opts["sdterm_started"], 10, 64); err == nil && ms > 0 {
-		e.started = time.UnixMilli(ms)
+	for _, key := range []string{"spectashell_started", "sdterm_started"} {
+		if ms, err := strconv.ParseInt(opts[key], 10, 64); err == nil && ms > 0 {
+			e.started = time.UnixMilli(ms)
+			break
+		}
 	}
 	command, column := e.command, t.cx
 	t.mark(func(m *Mark) { m.Output, m.OutputColumn, m.Command = true, column, command })
@@ -482,7 +488,7 @@ func (t *Terminal) commandSequences(b *strings.Builder) {
 			b.WriteString(";cmdline_url=" + url.PathEscape(e.command))
 		}
 		if !e.started.IsZero() {
-			b.WriteString(";sdterm_started=" + strconv.FormatInt(e.started.UnixMilli(), 10))
+			b.WriteString(";spectashell_started=" + strconv.FormatInt(e.started.UnixMilli(), 10))
 		}
 		b.WriteString("\x07")
 	}

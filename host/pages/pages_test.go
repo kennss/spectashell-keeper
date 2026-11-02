@@ -1,6 +1,6 @@
 // pages_test.go
 // Author: Kennt Kim
-// Created: 2026-10-25 · Last updated: 2026-10-30
+// Created: 2026-10-25 · Last updated: 2026-11-02
 //
 // Purpose: the pieces of an agent's page commands (Docs/design/05-WINDOWS.md §3) on their own: a
 // command finds its shell's keeper by the variable, else by its parents, and the device holding it;
@@ -76,6 +76,16 @@ func TestACommandFindsItsShellByTheVariableElseByItsParents(t *testing.T) {
 	}
 	if d, err := Own(dir, env, 900, parent); err != nil || d.KeeperID != a.KeeperID {
 		t.Fatalf("by the variable: %v, %v", d.KeeperID, err)
+	}
+	// A shell started before the variable took SpectaShell's name has only the earlier one.
+	earlier := func(k string) string {
+		if k == "SDTERM_KEEPER_ID" {
+			return a.KeeperID
+		}
+		return ""
+	}
+	if d, err := Own(dir, earlier, 900, parent); err != nil || d.KeeperID != a.KeeperID {
+		t.Fatalf("by the earlier variable: %v, %v", d.KeeperID, err)
 	}
 	// A variable naming no keeper here is passed over.
 	gone := func(string) string { return "cccccccccccccccc" }

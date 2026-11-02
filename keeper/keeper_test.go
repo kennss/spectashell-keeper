@@ -1,6 +1,6 @@
 // keeper_test.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: keepers as real processes (this test binary re-run as `keep`): input and output, a
 // session detaching and another taking over with the kept output replayed and the remembered
@@ -30,8 +30,8 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	if os.Getenv("SDTERM_KEEPER_HELPER") == "1" {
-		if path := os.Getenv("SDTERM_KEEPER_NOTICES"); path != "" {
+	if os.Getenv("SPECTASHELL_KEEPER_HELPER") == "1" {
+		if path := os.Getenv("SPECTASHELL_KEEPER_NOTICES"); path != "" {
 			os.Exit(MainObserved(func(v View) Observer { return &fileObserver{path: path, view: v} }))
 		}
 		os.Exit(Main())
@@ -52,7 +52,7 @@ func shortDir(t *testing.T) string {
 
 func startKeeper(t *testing.T, dir, id string, argv []string) *Conn {
 	t.Helper()
-	t.Setenv("SDTERM_KEEPER_HELPER", "1")
+	t.Setenv("SPECTASHELL_KEEPER_HELPER", "1")
 	c, err := Start([]string{os.Args[0]}, Config{
 		Socket: SocketPath(dir, id), KeeperID: id, Path: argv[0], Argv: argv, Dir: dir,
 		Env: []string{"PATH=/usr/bin:/bin", "TERM=xterm-256color"}, Columns: 80, Rows: 24,

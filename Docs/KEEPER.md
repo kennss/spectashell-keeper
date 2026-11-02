@@ -1,6 +1,6 @@
 # The keeper protocol
 
-> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-11-01
+> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-11-02
 >
 > Status: **version 1, forever.** It only grows: any later build must talk to a keeper an earlier
 > build started. Code: `engine/keeper/protocol.go` (the format), `keeper.go` (the keeper),
@@ -10,8 +10,8 @@ A keeper is a small process that holds one program on a pseudo-terminal, keeps i
 and serves its clients over Unix sockets — one at a time holding the keyboard, the others watching
 (§2.1) — so the program outlives whoever started it: an app that quits or updates, a session that is
 replaced, a connection that drops (Docs/design/01-DESIGN.md §5). This is the terminal engine's
-protocol, not any application's; sdTerm and SiliconDesk speak it (SiliconDesk's host defined it,
-`host/internal/keeper`, 2026-10-14).
+protocol, not any application's; SpectaShell and SiliconDesk speak it (SiliconDesk's host defined
+it, `host/internal/keeper`, 2026-10-14).
 
 ## 1. Starting a keeper
 
@@ -22,15 +22,15 @@ closes it:
 | Key | Meaning |
 |---|---|
 | `socket` | Where it listens: `<folder>/<keeper id>.sock` |
-| `keeper_id` | Its id: 16 hexadecimal characters in sdTerm (a socket's path is at most 104 bytes on macOS) |
+| `keeper_id` | Its id: 16 hexadecimal characters in SpectaShell (a socket's path is at most 104 bytes on macOS) |
 | `path`, `argv`, `dir`, `env` | The program: what is executed, its arguments (`argv[0]` may be `-zsh`), its folder, its whole environment |
 | `columns`, `rows` | The terminal's size; 0 is 80 × 24 |
-| `meta` | What it remembers for the next client (§3); *(sdTerm, 2026-10-30)* the only place `started_by` is set |
-| `build` | *(sdTerm, 2026-10-23)* The keeper program's build, for its description |
+| `meta` | What it remembers for the next client (§3); *(SpectaShell, 2026-10-30)* the only place `started_by` is set |
+| `build` | *(SpectaShell, 2026-10-23)* The keeper program's build, for its description |
 
 It answers one line on standard output — `ready`, or `error: <reason>` — then points its standard
 streams at `/dev/null`. It listens on two sockets, each mode 0600, in a folder that must be the
-user's own (§5): `<keeper id>.sock`, where a connection takes the keeper over, and *(sdTerm,
+user's own (§5): `<keeper id>.sock`, where a connection takes the keeper over, and *(SpectaShell,
 2026-10-26)* `<keeper id>.join`, where a connection joins to watch (§2.1).
 
 ## 2. Frames
@@ -45,32 +45,32 @@ key it does not know is ignored, and nothing that exists changes meaning.
 | 2 Output | keeper → client | The program's output |
 | 3 ReplayEnd | keeper → client | None: the kept output ends here, live output follows |
 | 4 Exit | keeper → client | JSON: `code` (-1 for a signal), `signal` (`SIGHUP`) |
-| 5 TakenOver | keeper → client | *(sdTerm, 2026-10-23)* None: another client connected and this connection closes next |
-| 6 Info | keeper → client | *(sdTerm, 2026-10-23)* JSON: what runs in the shell (§6) |
-| 7 Size | keeper → client | *(sdTerm, 2026-10-23)* Columns and rows, 2 bytes each, big-endian: in the replay, the size the kept output after it was written at; *(2026-10-26)* to a watcher, also the terminal's size whenever it changes |
-| 8 Present | keeper → client | *(sdTerm, 2026-10-26)* JSON: `holding` (this connection holds the keyboard), `holder` (`{client, client_id}` of the one that does, absent when none does), `watchers` (the same of each watcher): to every connection that joined or said Who, whenever it changes (§2.1) |
+| 5 TakenOver | keeper → client | *(SpectaShell, 2026-10-23)* None: another client connected and this connection closes next |
+| 6 Info | keeper → client | *(SpectaShell, 2026-10-23)* JSON: what runs in the shell (§6) |
+| 7 Size | keeper → client | *(SpectaShell, 2026-10-23)* Columns and rows, 2 bytes each, big-endian: in the replay, the size the kept output after it was written at; *(2026-10-26)* to a watcher, also the terminal's size whenever it changes |
+| 8 Present | keeper → client | *(SpectaShell, 2026-10-26)* JSON: `holding` (this connection holds the keyboard), `holder` (`{client, client_id}` of the one that does, absent when none does), `watchers` (the same of each watcher): to every connection that joined or said Who, whenever it changes (§2.1) |
 | 10 Input | client → keeper | Bytes for the program's input |
 | 11 Resize | client → keeper | Columns and rows, 2 bytes each, big-endian |
 | 12 Meta | client → keeper | JSON: what to remember (§3) |
-| 13 Hangup | client → keeper | None, or *(sdTerm, 2026-10-26)* JSON `{client, client_id}`: the client hanging up, as it names itself in Meta, for the keeper's end (§7). The program's process group gets `SIGHUP`, and the keeper ends |
+| 13 Hangup | client → keeper | None, or *(SpectaShell, 2026-10-26)* JSON `{client, client_id}`: the client hanging up, as it names itself in Meta, for the keeper's end (§7). The program's process group gets `SIGHUP`, and the keeper ends |
 | 14 Stop | client → keeper | None: `SIGTERM` to the program's whole process group, `SIGKILL` 10 seconds later, until it is empty; then the keeper ends |
-| 15 Who | client → keeper | *(sdTerm, 2026-10-26)* JSON `{client, client_id}`: names this connection, and says it can watch (§2.1) |
-| 16 Take | client → keeper | *(sdTerm, 2026-10-26)* None: a watcher takes the keyboard (§2.1) |
-| 17 Front | client → keeper | *(sdTerm, 2026-10-30)* JSON `{"for": seconds}`: this connection's device is in front, looking, for that long (at most 300); `{"for": 0}`: it went away (§2.2) |
+| 15 Who | client → keeper | *(SpectaShell, 2026-10-26)* JSON `{client, client_id}`: names this connection, and says it can watch (§2.1) |
+| 16 Take | client → keeper | *(SpectaShell, 2026-10-26)* None: a watcher takes the keyboard (§2.1) |
+| 17 Front | client → keeper | *(SpectaShell, 2026-10-30)* JSON `{"for": seconds}`: this connection's device is in front, looking, for that long (at most 300); `{"for": 0}`: it went away (§2.2) |
 
 Each connection gets, in order: Hello; the kept output — first the sequences that put back the modes
 the program set in output no longer kept, then the last 1 MiB of output from a clean place (the
 first escape or newline, so no tail of a sequence is shown as text) — then ReplayEnd; Exit, if the
 program has ended; then live output.
 
-**The kept output is sent at the sizes it was written at.** *(sdTerm, 2026-10-23.)* A program writes
-for the size it was told, so output drawn at another width wraps where the program did not mean it
-to: zsh's end-of-line mark, written at 80 columns and drawn at 69, leaves a `%` above every prompt
-(Docs/design/02-CONNECTIONS.md §1). The keeper remembers where in its kept output each Resize took
-effect, and the replay sends Size before each stretch of one size: the first before any output, the
-last with the size now, followed by no output when nothing was written since. A client draws each
-stretch at its size, then goes on at its own. A client from before Size skips it and draws the whole
-replay at one size, as before.
+**The kept output is sent at the sizes it was written at.** *(SpectaShell, 2026-10-23.)* A program
+writes for the size it was told, so output drawn at another width wraps where the program did not
+mean it to: zsh's end-of-line mark, written at 80 columns and drawn at 69, leaves a `%` above every
+prompt (Docs/design/02-CONNECTIONS.md §1). The keeper remembers where in its kept output each Resize
+took effect, and the replay sends Size before each stretch of one size: the first before any output,
+the last with the size now, followed by no output when nothing was written since. A client draws
+each stretch at its size, then goes on at its own. A client from before Size skips it and draws the
+whole replay at one size, as before.
 
 **A new connection takes the keeper over.** The keeper sends the connection it had TakenOver, closes
 it, and serves the new one. A client from before TakenOver skips the frame and sees its connection
@@ -80,7 +80,7 @@ taken over; the connections watching stay (§2.1).
 
 ### 2.1 Joining
 
-*(sdTerm, 2026-10-26; Docs/design/07-TEAMS.md §1.)* A connection on the second socket,
+*(SpectaShell, 2026-10-26; Docs/design/07-TEAMS.md §1.)* A connection on the second socket,
 `<keeper id>.join`, joins the keeper to watch: it gets Hello and the replay as any connection does,
 and takes nothing from anyone. Of all the keeper's connections one at most holds the keyboard, and
 the others watch.
@@ -114,7 +114,7 @@ so.
 
 ### 2.2 Who is looking
 
-*(sdTerm, 2026-10-30; SpectaShell's Docs/design/08-PUSH.md §4.2.)* A keeper whose program asked
+*(SpectaShell, 2026-10-30; SpectaShell's Docs/design/08-PUSH.md §4.2.)* A keeper whose program asked
 for the user — a status becoming `blocked` or `done` (§4), a program's own notification (OSC 9,
 777, 99), a command that ran long — may tell a device that is away (the keeper program's observer,
 `MainObserved`). It must first know whether anyone is looking. A connection says so with **Front**:
@@ -144,17 +144,17 @@ What a keeper remembers for the next client, and describes itself with:
 | `title`, `directory` | The last title and folder the client saw (the keeper does not parse output) |
 | `restoration_id` | The client's name for the terminal's window, to put it back in the same place |
 | `server` | SiliconDesk's: the port and token of a web app's server the keeper holds instead of a terminal |
-| `client` | *(sdTerm, 2026-10-23)* The device that attached last, by its name ("Sam's MacBook Pro"), as that client tells it on attaching |
-| `client_id` | *(sdTerm, 2026-10-25)* That device's own id, which tells it apart from another of the same name (every iPad is "iPad" to an app) |
-| `origin` | *(sdTerm, 2026-10-27)* The starting client's own name for where it started the program from — sdTerm's saved host it reached the keeper through — kept as given: a client attaching later never changes it, so every client names the terminal alike whatever address it reaches the host by |
-| `arrangement` | *(sdTerm, 2026-10-30)* The client's description of where the terminal sits among others — sdTerm's: the desk it is in, as JSON — kept as given and read only by clients; a client watching (§2.1) never sets it |
-| `started_by` | *(sdTerm, 2026-10-30)* The client that started the program, `{client, client_id}`, given in the keeper's configuration and kept by the keeper itself: a client's Meta never changes it, so one of an earlier build, which knows no such key, cannot drop it. sdTerm closes a terminal another device started by leaving it to its keeper. Absent for a keeper started before |
+| `client` | *(SpectaShell, 2026-10-23)* The device that attached last, by its name ("Sam's MacBook Pro"), as that client tells it on attaching |
+| `client_id` | *(SpectaShell, 2026-10-25)* That device's own id, which tells it apart from another of the same name (every iPad is "iPad" to an app) |
+| `origin` | *(SpectaShell, 2026-10-27)* The starting client's own name for where it started the program from — SpectaShell's saved host it reached the keeper through — kept as given: a client attaching later never changes it, so every client names the terminal alike whatever address it reaches the host by |
+| `arrangement` | *(SpectaShell, 2026-10-30)* The client's description of where the terminal sits among others — SpectaShell's: the desk it is in, as JSON — kept as given and read only by clients; a client watching (§2.1) never sets it |
+| `started_by` | *(SpectaShell, 2026-10-30)* The client that started the program, `{client, client_id}`, given in the keeper's configuration and kept by the keeper itself: a client's Meta never changes it, so one of an earlier build, which knows no such key, cannot drop it. SpectaShell closes a terminal another device started by leaving it to its keeper. Absent for a keeper started before |
 
 ## 4. Descriptions
 
-*(sdTerm, 2026-10-23.)* Each keeper writes `<keeper id>.json` beside its socket, mode 0600, when it
-starts, when its meta changes and when its program ends, and removes it when it ends. It is written
-to a temporary name and renamed, so a reader never sees half of one.
+*(SpectaShell, 2026-10-23.)* Each keeper writes `<keeper id>.json` beside its socket, mode 0600,
+when it starts, when its meta changes and when its program ends, and removes it when it ends. It is
+written to a temporary name and renamed, so a reader never sees half of one.
 
 | Key | Meaning |
 |---|---|
@@ -188,23 +188,22 @@ folder no longer leaves shells running out of every client's reach (02-CONNECTIO
 
 The folder and the one above it are created 0700 and checked with `lstat` before use: a real
 directory, not a symbolic link, owned by the user, with no group or other permission. On a shared
-server another user could create the folder first, or a link in its place; then no keeper starts
-and the client says why. An environment variable the application names (`SPECTASHELL_RUNTIME_DIR` for
-sdTerm) can name another folder.
+server another user could create the folder first, or a link in its place; then no keeper starts and
+the client says why. An environment variable the application names (`SPECTASHELL_RUNTIME_DIR` for
+SpectaShell) can name another folder.
 
-*(sdTerm, 2026-10-29.)* Beside a keeper's socket may be its agent link, `<id>.agent`: a symbolic
-link to the SSH agent forwarded to the client holding the keeper, which a terminal started with the
-agent forwarded names as SSH_AUTH_SOCK. A client points it as it attaches (replacing it in one
-rename, under the lock of `<id>.agentlock`) and takes it back as it leaves, unless another client
-pointed it meanwhile; a client watching never points it. The keeper removes both as it ends, and a
-listing removes them with a dead keeper's socket.
+*(SpectaShell, 2026-10-29.)* Beside a keeper's socket may be its agent link, `<id>.agent`: a
+symbolic link to the SSH agent forwarded to the client holding the keeper, which a terminal started
+with the agent forwarded names as SSH_AUTH_SOCK. A client points it as it attaches (replacing it in
+one rename, under the lock of `<id>.agentlock`) and takes it back as it leaves, unless another
+client pointed it meanwhile; a client watching never points it. The keeper removes both as it ends,
+and a listing removes them with a dead keeper's socket.
 
 ## 6. What runs in the shell
 
-*(sdTerm, 2026-10-23.)* While a client is connected, the keeper reads what runs in its shell every
-2 seconds — beside the shell, on whichever machine it is (the engine's `paneinfo`: `/proc` on
-Linux, `sysctl` and `libproc` on the Mac) — and sends Info after the replay and whenever it
-changed.
+*(SpectaShell, 2026-10-23.)* While a client is connected, the keeper reads what runs in its shell
+every 2 seconds — beside the shell, on whichever machine it is (the engine's `paneinfo`: `/proc` on
+Linux, `sysctl` and `libproc` on the Mac) — and sends Info after the replay and whenever it changed.
 
 | Key | Meaning |
 |---|---|
@@ -217,15 +216,15 @@ changed.
 
 ## 7. How a keeper ends
 
-After Hangup; after Stop; 24 hours after its program ended with no client connected; or on
-SIGTERM, SIGINT, SIGQUIT or SIGHUP, as it would on Hangup (sdTerm, 2026-10-29: before, any of them
-ended it at once, without an end). A client that only disconnects never ends it, so the next
-client can still show the program's exit.
+After Hangup; after Stop; 24 hours after its program ended with no client connected; or on SIGTERM,
+SIGINT, SIGQUIT or SIGHUP, as it would on Hangup (SpectaShell, 2026-10-29: before, any of them ended
+it at once, without an end). A client that only disconnects never ends it, so the next client can
+still show the program's exit.
 
-*(sdTerm, 2026-10-26.)* Ending, a keeper writes `<keeper id>.end` beside its socket, mode 0600, by
-a temporary name renamed, before it removes its socket and description: a device whose shell
-another closed can then say so, where before it could only say the shell was gone (a Mac
-closed two shells, and the iPads' tabs said their programs had ended).
+*(SpectaShell, 2026-10-26.)* Ending, a keeper writes `<keeper id>.end` beside its socket, mode 0600,
+by a temporary name renamed, before it removes its socket and description: a device whose shell
+another closed can then say so, where before it could only say the shell was gone (a Mac closed two
+shells, and the iPads' tabs said their programs had ended).
 
 | Key | Meaning |
 |---|---|
@@ -239,7 +238,7 @@ closed two shells, and the iPads' tabs said their programs had ended).
 
 A reader removes ends older than 30 days, and files named `.end` that are not one.
 
-*(sdTerm, 2026-10-29.)* A keeper keeps an event log, `<keeper id>.log` beside its socket, mode
+*(SpectaShell, 2026-10-29.)* A keeper keeps an event log, `<keeper id>.log` beside its socket, mode
 0600: a line with its time for each thing that happens to it — started, a client attached, joined,
 named itself, taken over or gone, its program's end, a signal, its own end — cut to its newest half
 past 64 KiB. A keeper that writes its end removes it; a reader that writes `lost` for a keeper puts
@@ -255,10 +254,10 @@ steps did not end another.
 | 2026-10-14 | Version 1, in SiliconDesk: Hello, Output, ReplayEnd, Exit, Input, Resize, Meta, Hangup |
 | 2026-10-15 | `restoration_id` in Meta |
 | 2026-10-19 | Stop, and `server` in Meta (SiliconDesk's web apps) |
-| 2026-10-23 | sdTerm: TakenOver, descriptions, `build`, the folders' times refreshed, Info, Size; `client` in Meta, `attached` and `exit` in descriptions |
-| 2026-10-25 | sdTerm: `client_id` in Meta; `preview`, `full_screen` and `screen_title` in descriptions; a socket or description removed is made again |
-| 2026-10-26 | sdTerm: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
-| 2026-10-27 | sdTerm: `origin` in Meta |
-| 2026-10-29 | sdTerm: `status` and `status_kind` in descriptions; a signal ends a keeper as Hangup does, its end `signalled` with `signal`; the event log (`<id>.log`), and `events` in a `lost` end; the agent link (`<id>.agent`, §5) |
-| 2026-10-30 | sdTerm: `arrangement` and `started_by` in Meta, `started_by` set only by the configuration |
-| 2026-10-30 | sdTerm: Front; `push` in descriptions and Hello |
+| 2026-10-23 | SpectaShell: TakenOver, descriptions, `build`, the folders' times refreshed, Info, Size; `client` in Meta, `attached` and `exit` in descriptions |
+| 2026-10-25 | SpectaShell: `client_id` in Meta; `preview`, `full_screen` and `screen_title` in descriptions; a socket or description removed is made again |
+| 2026-10-26 | SpectaShell: Hangup names its client; a keeper's end (`<id>.end`); joining — the second socket (`<id>.join`), Who, Take, Present, Size to watchers, `watchers` in descriptions |
+| 2026-10-27 | SpectaShell: `origin` in Meta |
+| 2026-10-29 | SpectaShell: `status` and `status_kind` in descriptions; a signal ends a keeper as Hangup does, its end `signalled` with `signal`; the event log (`<id>.log`), and `events` in a `lost` end; the agent link (`<id>.agent`, §5) |
+| 2026-10-30 | SpectaShell: `arrangement` and `started_by` in Meta, `started_by` set only by the configuration |
+| 2026-10-30 | SpectaShell: Front; `push` in descriptions and Hello |

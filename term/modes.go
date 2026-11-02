@@ -1,6 +1,6 @@
 // modes.go
 // Author: Kennt Kim
-// Created: 2026-10-16 · Last updated: 2026-10-23
+// Created: 2026-10-16 · Last updated: 2026-11-02
 //
 // Purpose: a terminal's modes as the sequences that set them (ModeSequences), so that a fresh
 // terminal can be brought to the state another one had. A keeper replays only the program's
@@ -15,10 +15,10 @@
 //   visibility, shape and blinking, bracketed paste, focus events, mouse tracking and its SGR
 //   encoding, the alternate screen, the kitty keyboard stacks of both screens, the title, the
 //   working directory, and what the program says it is doing (its OSC 7501 records and OSC 9;4
-//   progress, notify.go) — so a coding agent's status survives a session change (Docs/SDTERM-2.md
-//   §3.2) — and the commands running (prompts.go), so a long one's end is still reported (§4.2).
-//   Not covered: what the replayed output redraws anyway — screen contents,
-//   the cursor's position, the pen, the scroll region and origin mode, character sets.
+//   progress, notify.go) — so a coding agent's status survives a session change (SiliconDesk's
+//   Docs/SDTERM-2.md §3.2) — and the commands running (prompts.go), so a long one's end is still
+//   reported (§4.2). Not covered: what the replayed output redraws anyway — screen contents, the
+//   cursor's position, the pen, the scroll region and origin mode, character sets.
 // - The alternate screen is entered with mode 1047 (no saved cursor, no clear): its contents come
 //   from the replay. A main-screen kitty stack is pushed before entering it, an alternate-screen
 //   stack after.

@@ -1,6 +1,6 @@
 // procfs_ports_test.go
 // Author: Kennt Kim
-// Created: 2026-10-17 · Last updated: 2026-10-23
+// Created: 2026-10-17 · Last updated: 2026-11-02
 //
 // Purpose: the ports a terminal's processes listen on, through Linux's /proc reader from a /proc
 // made for the test (procfs_ports.go) — so it runs on any machine: loopback and every-address
@@ -33,7 +33,7 @@ func fakeNet(t *testing.T, root string) {
 	tcp := header +
 		line("0100007F:1FFC", "0A", "111") + // 127.0.0.1:8188
 		line("00000000:22B8", "0A", "222") + // 0.0.0.0:8888
-		line("1401A8C0:0050", "0A", "333") + // 192.168.1.20:80: another address
+		line("140200C0:0050", "0A", "333") + // 192.0.2.20:80 (RFC 5737): another address
 		line("0100007F:1FFC", "01", "444") + // an established connection
 		line("0100007F:0BB8", "0A", "777") // 127.0.0.1:3000, another terminal's
 	tcp6 := header +

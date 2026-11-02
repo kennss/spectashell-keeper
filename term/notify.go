@@ -1,10 +1,11 @@
 // notify.go
 // Author: Kennt Kim
-// Created: 2026-10-19 · Last updated: 2026-10-23
+// Created: 2026-10-19 · Last updated: 2026-11-02
 //
-// Purpose: what a program says to the user through the terminal (Docs/SDTERM-2.md §3, PROTOCOL.md
-// §7.2): notifications (OSC 9, OSC 777, OSC 99) and its status (the Program Status Protocol, OSC
-// 7501, and OSC 9;4 progress), which coding agents such as Claude Code and Codex report.
+// Purpose: what a program says to the user through the terminal (SiliconDesk's Docs/SDTERM-2.md §3,
+// PROTOCOL.md §7.2): notifications (OSC 9, OSC 777, OSC 99) and its status (the Program Status
+// Protocol, OSC 7501, and OSC 9;4 progress), which coding agents such as Claude Code and Codex
+// report.
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/term/notify.go on 2026-10-23.

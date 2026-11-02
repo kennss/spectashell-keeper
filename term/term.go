@@ -1,6 +1,6 @@
 // term.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-23
+// Created: 2026-10-14 · Last updated: 2026-11-02
 //
 // Purpose: an xterm-compatible terminal emulator without a display — the session's model of a
 // terminal screen (spec/PROTOCOL.md §7). Output from the program goes in through Write; the
@@ -91,8 +91,8 @@ type Options struct {
 	Now func() time.Time
 	// Hostname is this machine's name, to tell a local directory from another host's (OSC 7).
 	Hostname string
-	// Name is how the terminal names itself to a program that asks (XTVERSION); empty: "sdterm",
-	// the engine's own name. The engine's user gives its application's name.
+	// Name is how the terminal names itself to a program that asks (XTVERSION); empty:
+	// "spectashell", the engine's own name. The engine's user gives its application's name.
 	Name string
 	// Triggered receives each line that matched a trigger that notifies (triggers.go); nil
 	// ignores them.
@@ -1061,7 +1061,7 @@ func (t *Terminal) HistoryLimit() int { return t.hist.limit }
 // programName is the name the terminal gives in reports (Options.Name).
 func (t *Terminal) programName() string {
 	if t.name == "" {
-		return "sdterm"
+		return "spectashell"
 	}
 	return t.name
 }

@@ -1,11 +1,11 @@
 // triggers.go
 // Author: Kennt Kim
-// Created: 2026-10-20 · Last updated: 2026-10-23
+// Created: 2026-10-20 · Last updated: 2026-11-02
 //
-// Purpose: triggers (Docs/SDTERM-2.md §9.2, PROTOCOL.md §7.10) — patterns looked for in each line a
-// program finishes: the text they match is highlighted (AttrHighlight, drawn by the device in its
-// highlight colours), and a trigger that notifies is reported (Options.Triggered) for the app to
-// tell the user ("CUDA out of memory" in a training run left alone).
+// Purpose: triggers (SiliconDesk's Docs/SDTERM-2.md §9.2, PROTOCOL.md §7.10) — patterns looked for
+// in each line a program finishes: the text they match is highlighted (AttrHighlight, drawn by the
+// device in its highlight colours), and a trigger that notifies is reported (Options.Triggered) for
+// the app to tell the user ("CUDA out of memory" in a training run left alone).
 //
 // Notes:
 // - Taken from SiliconDesk's host/internal/term/triggers.go on 2026-10-23.

@@ -1,6 +1,6 @@
 // live_test.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-10-29
+// Created: 2026-10-23 · Last updated: 2026-11-02
 //
 // Purpose: what runs in real terminals on this machine (Linux or macOS), read by Reader.Read: a
 // shell on a pseudo-terminal with a program in front in a process group of its own and a server in
@@ -45,10 +45,10 @@ import (
 )
 
 const (
-	helperEnv = "SDTERM_PANEINFO_HELPER" // "shell" or "idle": the test binary plays that part
-	configEnv = "SDTERM_PANEINFO_CONFIG" // the shell's helperConfig, as JSON
-	lockEnv   = "SDTERM_PANEINFO_LOCK"   // a file an idle program holds open
-	listenEnv = "SDTERM_PANEINFO_LISTEN" // set: an idle program listens on 127.0.0.1:0 and :0
+	helperEnv = "SPECTASHELL_PANEINFO_HELPER" // "shell" or "idle": the test binary plays that part
+	configEnv = "SPECTASHELL_PANEINFO_CONFIG" // the shell's helperConfig, as JSON
+	lockEnv   = "SPECTASHELL_PANEINFO_LOCK"   // a file an idle program holds open
+	listenEnv = "SPECTASHELL_PANEINFO_LISTEN" // set: an idle program listens on 127.0.0.1:0 and :0
 )
 
 // helperConfig is what a helper shell runs.
