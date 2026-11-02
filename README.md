@@ -1,8 +1,10 @@
 # spectashell-keeper — the terminal engine and the keeper SpectaShell puts on a host
 
-> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-10-31
+> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-11-02
 >
-> Licensed under the Apache License 2.0 ([LICENSE](LICENSE)). Copyright 2026 Calida Lab.
+> Licensed under the Apache License 2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)). Copyright 2026
+> Calida Lab. A vulnerability is reported privately ([SECURITY.md](SECURITY.md)); other changes
+> are welcome as issues and pull requests ([CONTRIBUTING.md](CONTRIBUTING.md)).
 
 SpectaShell is a terminal for the Mac, the iPad and the iPhone. On a machine where the user lets it,
 it puts a small program there, `spectashell-keeper`, which holds the shell and its last output, so
