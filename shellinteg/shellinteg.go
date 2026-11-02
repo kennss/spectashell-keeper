@@ -12,8 +12,9 @@
 // - The scripts are built into the binary (scripts/) and written to a directory on the host by
 //   Install, rewritten only when they differ; a shell reads them once, at start, so a shell left
 //   running by an earlier build is not affected by a later one rewriting them.
-// - Install also removes what the directory holds that is not one of the scripts: the Mac's
-//   directory is the app's, kept from build to build, and fish reads every file in
+// - Install also removes what the directory holds that is not one of the scripts. A host's
+//   directory is beside each build's keeper, new with each build, but the one for the Mac app's
+//   local shells is the app's, kept from build to build, and fish reads every file in
 //   vendor_conf.d — the scripts renamed from sdterm.* on 2026-11-02 would have left sdterm.fish
 //   there, marking each prompt and command a second time.
 // - Inject changes the argv and environment of a login shell (argv0 starting with '-'):
