@@ -1,6 +1,6 @@
 // hostkeeper.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-11-02
+// Created: 2026-10-23 · Last updated: 2026-11-07
 //
 // Purpose: what spectashell-keeper's commands on a host read and print
 // (Docs/design/02-CONNECTIONS.md §3) — start a keeper for a terminal, list the keepers there with
@@ -10,7 +10,9 @@
 // Notes:
 // - The binary is at ~/.local/share/spectashell/<build>/spectashell-keeper (Programs; the core's installer
 //   puts it there). Its folder's name is a build checked to be plain characters (IsPlain), so a
-//   command line can name it without quoting.
+//   command line can name it without quoting. On a Mac that path is a link into the app bundle
+//   beside it, spectashell-keeper.app (from 2026-11-07, so macOS knows the keeper by its bundle
+//   id); ProgramDir is the build's folder either way.
 // - The program's types are here so the keeper program (cmd/spectashell-keeper) and the core, which
 //   runs its commands over SSH, agree on them in one place.
 // - BuildsInUse is what the installer keeps: the builds of the keepers here, and of every program
@@ -133,6 +135,20 @@ func IsPlain(s string) bool { return plain.MatchString(s) }
 // folder for each build: <Programs>/<build>/spectashell-keeper (install.Ensure).
 func Programs(home string) string {
 	return filepath.Join(home, ".local", "share", "spectashell")
+}
+
+// ProgramDir is the folder the keeper program at self is installed in, where it keeps what it
+// writes (shell-integration/): the folder self is in or, when self is a Mac app bundle's
+// executable (<folder>/spectashell-keeper.app/Contents/MacOS/spectashell-keeper), the folder
+// holding the bundle — a file written inside a signed bundle breaks its signature.
+func ProgramDir(self string) string {
+	dir := filepath.Dir(self)
+	contents := filepath.Dir(dir)
+	bundle := filepath.Dir(contents)
+	if filepath.Base(dir) == "MacOS" && filepath.Base(contents) == "Contents" && filepath.Ext(bundle) == ".app" {
+		return filepath.Dir(bundle)
+	}
+	return dir
 }
 
 // BuildOf is the build whose program in home's Programs path is; "" when it is not one of them.

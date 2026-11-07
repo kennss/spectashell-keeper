@@ -1,6 +1,6 @@
 # The keeper protocol
 
-> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-11-02
+> Author: Kennt Kim · Created: 2026-10-23 · Last updated: 2026-11-07
 >
 > Status: **version 1, forever.** It only grows: any later build must talk to a keeper an earlier
 > build started. Code: `engine/keeper/protocol.go` (the format), `keeper.go` (the keeper),
@@ -17,7 +17,12 @@ it, `host/internal/keeper`, 2026-10-14).
 
 The client runs the keeper program (`spectashell-keeper keep`) in a session of its own (`setsid`),
 so it is in no client's process group, writes a configuration to its standard input as JSON and
-closes it:
+closes it. On macOS the keeper is also started responsible for itself
+(`responsibility_spawnattrs_setdisclaim`, `keeper/spawn_darwin.go`): the system's privacy checks
+then judge what its shell opens by the keeper, which outlives its client, not by the client — an
+SSH login that has ended, whose shells were refused `~/Desktop` from then on (2026-11-07). The Mac's
+keeper program is an app bundle (`spectashell-keeper.app`), so the system keeps its user's answer
+for every build of it.
 
 | Key | Meaning |
 |---|---|

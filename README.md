@@ -1,6 +1,6 @@
 # spectashell-keeper — the terminal engine and the keeper SpectaShell puts on a host
 
-> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-11-02
+> Author: Kennt Kim · Created: 2026-10-29 · Last updated: 2026-11-07
 >
 > Licensed under the Apache License 2.0 ([LICENSE](LICENSE), [NOTICE](NOTICE)). Copyright 2026
 > Calida Lab. A vulnerability is reported privately ([SECURITY.md](SECURITY.md)); other changes
@@ -105,8 +105,10 @@ go generate ./gen        # the messages, after a change to proto/ (needs buf)
 ```
 
 `scripts/build-keeper.sh <out-dir> <version>` builds what the app carries — the Mac's universal
-binary and, for hosts, Linux and macOS on x86_64 and arm64 — on a Mac with Xcode, and writes
-`<out-dir>/hosts/SHA256SUMS`. The build id is the version, a dot, and a hash of the sources.
+app bundle and, for hosts, Linux and macOS on x86_64 and arm64 — on a Mac with Xcode, and writes
+`<out-dir>/hosts/SHA256SUMS`. The build id is the version, a dot, and a hash of the sources. On a
+Mac the keeper is an app bundle, `spectashell-keeper.app`, signed by `KEEPER_SIGN_IDENTITY` (ad hoc
+without it), so macOS keeps one privacy grant for it across builds; the script's notes say why.
 
 ## Checking a host's keeper
 
@@ -126,8 +128,9 @@ GOTOOLCHAIN=go1.27.2 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 sha256sum spectashell-keeper
 ```
 
-The macOS binaries are built with cgo, so they also depend on Xcode's compiler and SDK; the one
-inside the Mac app is signed with the app.
+The macOS binaries are built with cgo, so they also depend on Xcode's compiler and SDK, and each is
+signed inside its app bundle; `SHA256SUMS` names the signed executables, which a Mac host runs as
+`~/.local/share/spectashell/<build id>/spectashell-keeper.app/Contents/MacOS/spectashell-keeper`.
 
 ## Reading the source
 

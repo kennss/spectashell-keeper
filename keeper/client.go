@@ -1,6 +1,6 @@
 // client.go
 // Author: Kennt Kim
-// Created: 2026-10-14 · Last updated: 2026-10-30
+// Created: 2026-10-14 · Last updated: 2026-11-07
 //
 // Purpose: a client's side of the keeper protocol (Docs/KEEPER.md): starting a keeper for a new
 // terminal, connecting to one (new or left from before), reading its output and exit, sending
@@ -14,7 +14,8 @@
 //   notes say "session", read the client.
 // - Start runs `command` (the session binary with "keep", or a test helper) in a session of its own
 //   (Setsid), so it is not in the session's process group and outlives it; the session reaps it if
-//   it ends first.
+//   it ends first. On a Mac it is also responsible for itself (spawn_darwin.go, 2026-11-07), so
+//   what its shell opens is judged by the keeper, not by an SSH connection long gone.
 // - Writes come from the session's loop and its goroutines alike; they are serialised.
 // - Closing a Conn without Hangup detaches: the keeper keeps the program for the next session.
 // - Joining (2026-10-26, Docs/design/07-TEAMS.md §1): DialJoin connects to watch, through the
@@ -41,7 +42,6 @@ import (
 	"io/fs"
 	"net"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -88,21 +88,50 @@ func Start(command []string, cfg Config, timeout time.Duration) (*Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	cmd := exec.Command(command[0], command[1:]...)
-	cmd.Stdin = strings.NewReader(string(in))
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
-	out, err := cmd.StdoutPipe()
+	stdinR, stdinW, err := os.Pipe()
 	if err != nil {
 		return nil, err
 	}
-	if err := cmd.Start(); err != nil {
+	stdoutR, stdoutW, err := os.Pipe()
+	if err != nil {
+		stdinR.Close()
+		stdinW.Close()
+		return nil, err
+	}
+	devNull, err := os.Open(os.DevNull)
+	if err != nil {
+		stdinR.Close()
+		stdinW.Close()
+		stdoutR.Close()
+		stdoutW.Close()
+		return nil, err
+	}
+	proc, err := spawn(command, stdinR, stdoutW, devNull)
+	// The keeper has its own copies now; ours of its ends would keep its stdout open after it ends.
+	stdinR.Close()
+	stdoutW.Close()
+	devNull.Close()
+	if err != nil {
+		stdinW.Close()
+		stdoutR.Close()
 		return nil, fmt.Errorf("start keeper: %w", err)
 	}
-	go func() { _ = cmd.Wait() }() // reaped if it ends while this session runs
+	// Reaped if it ends while this session runs; its stdout is read to the end of its life, as
+	// os/exec did, so a late write of the keeper's never meets a closed pipe.
+	go func() {
+		_, _ = proc.Wait()
+		stdoutR.Close()
+	}()
+	// Written apart from reading its answer: a configuration larger than the pipe would otherwise
+	// wait for a keeper that has not read it yet.
+	go func() {
+		_, _ = stdinW.Write(in)
+		stdinW.Close()
+	}()
 
 	answer := make(chan string, 1)
 	go func() {
-		line, _ := bufio.NewReader(out).ReadString('\n')
+		line, _ := bufio.NewReader(stdoutR).ReadString('\n')
 		answer <- strings.TrimSpace(line)
 	}()
 	select {
@@ -114,7 +143,7 @@ func Start(command []string, cfg Config, timeout time.Duration) (*Conn, error) {
 			return nil, errors.New(strings.TrimPrefix(line, "error: "))
 		}
 	case <-time.After(timeout):
-		_ = cmd.Process.Kill()
+		_ = proc.Kill()
 		return nil, errors.New("the keeper did not start in time")
 	}
 	return Dial(cfg.Socket)

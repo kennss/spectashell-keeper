@@ -1,6 +1,6 @@
 // main.go
 // Author: Kennt Kim
-// Created: 2026-10-23 · Last updated: 2026-11-02
+// Created: 2026-10-23 · Last updated: 2026-11-07
 //
 // Purpose: spectashell-keeper, the program that holds a shell (Docs/design/02-CONNECTIONS.md §1,
 // 02-CONNECTIONS.md §3; the keeper itself is the engine's, engine/keeper). The Mac app carries it
@@ -54,7 +54,8 @@
 //   the user's own, or nothing starts (02-CONNECTIONS.md §3).
 // - start prepares the program as the Mac app's core does for a local shell (termhost.Prepare):
 //   the login shell with the terminal's variables, LANG from the request, and shell integration,
-//   whose scripts it writes beside this binary (shell-integration/), from the binary itself.
+//   whose scripts it writes beside this binary (shell-integration/), from the binary itself; on a
+//   Mac beside its app bundle, never inside it (hostkeeper.ProgramDir).
 // - A shell started with the agent forwarded (StartRequest.Agent) has SSH_AUTH_SOCK name the
 //   keeper's agent link, which `attach <id> --agent` points at the agent forwarded to its channel
 //   while it holds the keeper (keeper/agent.go): a kept shell outlives every connection, and each
@@ -237,7 +238,7 @@ func start(in io.Reader) StartAnswer {
 		TermProgram: req.TermProgram,
 		Extra:       extra}
 	if req.ShellIntegration {
-		launch.IntegrationDir = filepath.Join(filepath.Dir(self), "shell-integration")
+		launch.IntegrationDir = filepath.Join(hostkeeper.ProgramDir(self), "shell-integration")
 	}
 	prog, err := termhost.Prepare(launch)
 	if err != nil {
